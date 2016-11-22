@@ -1,6 +1,16 @@
 [package]
-name = "spotify-rs"
+name = "spotify"
 version = "0.0.1"
 authors = ["Splitty <splittydev@gmail.com>"]
 
+[lib]
+name = "spotify"
+path = "src/lib.rs"
+
+[[bin]]
+name = "spoticli"
+path = "src/bin/spoticli.rs"
+
 [dependencies]
+winapi = "0.2.8"
+kernel32-sys = "0.2.2"
