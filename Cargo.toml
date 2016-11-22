@@ -1,0 +1,6 @@
+[package]
+name = "spotify-rs"
+version = "0.0.1"
+authors = ["Splitty <splittydev@gmail.com>"]
+
+[dependencies]
