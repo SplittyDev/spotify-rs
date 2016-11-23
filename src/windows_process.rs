@@ -24,7 +24,7 @@ impl WindowsProcess {
         WindowsProcess { handle: handle }
     }
     /// Finds the first process with the specified name.
-    pub fn find_by_name(name: String) -> Option<WindowsProcess> {
+    pub fn find_by_name(name: &str) -> Option<WindowsProcess> {
         let processes = WindowsProcess::find_all_by_name(name);
         match processes.len() {
             0 => None,
@@ -32,7 +32,7 @@ impl WindowsProcess {
         }
     }
     /// Finds all processes with the specified name.
-    pub fn find_all_by_name(name: String) -> Vec<WindowsProcess> {
+    pub fn find_all_by_name(name: &str) -> Vec<WindowsProcess> {
         let snapshot = unsafe { CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0) };
         let dest_path = CString::new(name).unwrap();
         let mut vec = Vec::<WindowsProcess>::new();

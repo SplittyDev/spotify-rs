@@ -59,4 +59,7 @@ impl SpotifyConnector {
             token: token.into(),
         })
     }
+    pub fn get_oauth_token(&self) -> String {
+        self.token.clone()
+    }
 }
