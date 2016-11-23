@@ -1,4 +1,8 @@
 # Spotify-rs
+[![Travis CI](https://img.shields.io/travis/SplittyDev/spotify-rs/master.svg?style=flat-square)][travis-url]
+[![Crates.io](https://img.shields.io/crates/l/spotify.svg?style=flat-square)][crates-url]
+[![Crates.io](https://img.shields.io/crates/v/spotify.svg?style=flat-square)][crates-url]
+
 Easy to use Spotify Local API abstraction library.
 
 ## What it is
@@ -109,3 +113,6 @@ you might have it disabled. Here's how you enable it:
 
 You might wanna restart Spotify after doing that.   
 That's it! Everything should work now.
+
+[travis-url]: https://travis-ci.org/SplittyDev/spotify-rs
+[crates-url]: https://crates.io/crates/spotify
