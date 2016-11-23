@@ -15,11 +15,13 @@ extern crate json;
 #[cfg(windows)]
 mod windows_process;
 mod connector;
+mod status;
 
 // Imports
 #[cfg(windows)]
 use windows_process::WindowsProcess;
 use connector::{SpotifyConnector, InternalSpotifyError};
+use status::SpotifyStatus;
 use json::JsonValue;
 
 /// The `Result` type used in this crate.
@@ -74,6 +76,14 @@ impl Spotify {
             Ok(result) => Ok(Spotify { connector: result }),
             Err(error) => Err(SpotifyError::InternalError(error)),
         }
+    }
+    /// Fetches the current status from Spotify.
+    pub fn get_status(&self) -> Result<SpotifyStatus> {
+        let json = match self.get_status_object() {
+            Ok(result) => result,
+            Err(error) => return Err(error),
+        };
+        Ok(SpotifyStatus::from(json))
     }
     /// Fetches the current status from Spotify.
     pub fn get_status_object(&self) -> Result<JsonValue> {
