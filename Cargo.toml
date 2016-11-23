@@ -2,6 +2,11 @@
 name = "spotify"
 version = "0.1.0"
 authors = ["Splitty <splittydev@gmail.com>"]
+description = "Easy to use Spotify Local API abstractions."
+readme = "README.md"
+repository = "https://github.com/SplittyDev/spotify-rs"
+keywords = ["Spotify", "API"]
+license = "MIT"
 
 [lib]
 name = "spotify"
