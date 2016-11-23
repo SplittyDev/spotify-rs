@@ -12,12 +12,14 @@ extern crate time;
 extern crate json;
 
 // Modules
+#[cfg(windows)]
 mod windows_process;
 mod connector;
 
 // Imports
-use connector::{SpotifyConnector, InternalSpotifyError};
+#[cfg(windows)]
 use windows_process::WindowsProcess;
+use connector::{SpotifyConnector, InternalSpotifyError};
 use json::JsonValue;
 
 /// The `Result` type used in this crate.
@@ -47,6 +49,7 @@ impl Spotify {
     ///
     /// Does additional checks to verify that Spotify
     /// and SpotifyWebHelper are running.
+    #[cfg(windows)]
     pub fn new() -> Result<Spotify> {
         if !Spotify::spotify_alive() {
             return Err(SpotifyError::ClientNotRunning);
@@ -54,6 +57,13 @@ impl Spotify {
         if !Spotify::spotify_webhelper_alive() {
             return Err(SpotifyError::WebHelperNotRunning);
         }
+        Spotify::new_unchecked()
+    }
+    /// Constructs a new `Spotify`.
+    ///
+    /// Skips the checks and calls `Spotify::new_unchecked` directly.
+    #[cfg(not(windows))]
+    pub fn new() -> Result<Spotify> {
         Spotify::new_unchecked()
     }
     /// Constructs a new `Spotify`.
@@ -73,11 +83,13 @@ impl Spotify {
         }
     }
     /// Tests whether the Spotify process is running.
+    #[cfg(windows)]
     fn spotify_alive() -> bool {
         let process = "Spotify.exe";
         WindowsProcess::find_by_name(process).is_some()
     }
     /// Tests whether the SpotifyWebHelper process is running.
+    #[cfg(windows)]
     fn spotify_webhelper_alive() -> bool {
         let process = "SpotifyWebHelper.exe";
         WindowsProcess::find_by_name(process).is_some()

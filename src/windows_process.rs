@@ -1,3 +1,5 @@
+#![cfg(windows)]
+
 use std::cmp::Ordering;
 use std::ffi::{CStr, CString};
 use std::mem::{zeroed, size_of};
