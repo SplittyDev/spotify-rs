@@ -1,11 +1,26 @@
 extern crate spotify;
-use spotify::Spotify;
+use spotify::{Spotify, SpotifyError};
 
 #[allow(unused_variables)]
 fn main() {
-    let spotify = Spotify::new();
-    println!("Spotify running: {}", Spotify::spotify_alive());
-    println!("Spotify WebHelper running: {}",
-             Spotify::spotify_webhelper_alive());
-    println!("OAuth Token: {}", spotify.connector.get_oauth_token());
+    let spotify = match Spotify::new() {
+        Ok(result) => result,
+        Err(error) => {
+            match error {
+                SpotifyError::ClientNotRunning => {
+                    println!("The Spotify Client is not running!");
+                    std::process::exit(1);
+                }
+                SpotifyError::WebHelperNotRunning => {
+                    println!("The SpotifyWebHelper process is not running!");
+                    std::process::exit(2);
+                }
+                SpotifyError::InternalError(err) => {
+                    println!("Internal Error: {:?}", err);
+                    std::process::exit(3);
+                }
+            }
+        }
+    };
+    println!("It's working!");
 }
