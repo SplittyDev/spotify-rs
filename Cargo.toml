@@ -1,6 +1,6 @@
 [package]
 name = "spotify"
-version = "0.0.1"
+version = "0.1.0"
 authors = ["Splitty <splittydev@gmail.com>"]
 
 [lib]
