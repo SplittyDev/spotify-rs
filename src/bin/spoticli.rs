@@ -1,7 +1,7 @@
 extern crate spotify;
+use spotify::Spotify;
 
-use spotify::webhelper::SpotifyWebHelper;
-
+#[allow(unused_variables)]
 fn main() {
-    println!("Spotify Web Helper alive: {}", SpotifyWebHelper.is_alive())
+    let spotify = Spotify::new();
 }

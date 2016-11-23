@@ -1,13 +1,16 @@
+#![allow(dead_code)]
+
 use std::cmp::Ordering;
 use std::ffi::{CStr, CString};
 use std::mem::{zeroed, size_of};
-use winapi::minwindef::{DWORD, FALSE, TRUE};
-use winapi::winnt::{HANDLE, PROCESS_ALL_ACCESS};
-use winapi::tlhelp32::{PROCESSENTRY32, TH32CS_SNAPPROCESS};
-use kernel32::{CreateToolhelp32Snapshot, Process32First, Process32Next, OpenProcess};
+extern crate winapi;
+use self::winapi::minwindef::{DWORD, FALSE, TRUE};
+use self::winapi::winnt::{HANDLE, PROCESS_ALL_ACCESS};
+use self::winapi::tlhelp32::{PROCESSENTRY32, TH32CS_SNAPPROCESS};
+extern crate kernel32;
+use self::kernel32::{CreateToolhelp32Snapshot, Process32First, Process32Next, OpenProcess};
 
 /// The `WindowsProcess` struct.
-#[allow(dead_code)]
 #[derive(Clone)]
 pub struct WindowsProcess {
     /// The process handle.
@@ -39,7 +42,7 @@ impl WindowsProcess {
             let path = unsafe { CString::from(CStr::from_ptr(entry.szExeFile.as_ptr())) };
             if path.cmp(&dest_path) == Ordering::Equal {
                 let handle = unsafe { OpenProcess(PROCESS_ALL_ACCESS, FALSE, entry.th32ProcessID) };
-                vec.push(WindowsProcess::new(handle))
+                vec.push(WindowsProcess::new(handle));
             }
         };
         if unsafe { Process32First(snapshot, &mut entry) == TRUE } {
