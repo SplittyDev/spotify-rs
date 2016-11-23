@@ -4,12 +4,21 @@
 //! This crate contains methods to retrieve information from
 //! and manipulate the local Spotify client instance.
 
+// Extern crates
+extern crate winapi;
+extern crate kernel32;
+extern crate reqwest;
+extern crate time;
+extern crate json;
+
+// Modules
 mod windows_process;
 mod connector;
-mod webhelper;
 
+// Imports
 use connector::{SpotifyConnector, InternalSpotifyError};
 use windows_process::WindowsProcess;
+use json::JsonValue;
 
 /// The `Result` type used in this crate.
 type Result<T> = ::std::result::Result<T, SpotifyError>;
@@ -36,9 +45,8 @@ pub struct Spotify {
 impl Spotify {
     /// Constructs a new `Spotify`.
     ///
-    /// Checks whether the Spotify Client and the
-    /// SpotifyWebHelper process are running and returns
-    /// end-user-friendly errors in the case of failure.
+    /// Does additional checks to verify that Spotify
+    /// and SpotifyWebHelper are running.
     pub fn new() -> Result<Spotify> {
         if !Spotify::spotify_alive() {
             return Err(SpotifyError::ClientNotRunning);
@@ -51,10 +59,16 @@ impl Spotify {
     /// Constructs a new `Spotify`.
     ///
     /// Skips the checks done in `Spotify::new`.
-    /// Returns an end-user-friendly error in case of failure.
     pub fn new_unchecked() -> Result<Spotify> {
-        match SpotifyConnector::new("127.0.0.1".into()) {
+        match SpotifyConnector::new() {
             Ok(result) => Ok(Spotify { connector: result }),
+            Err(error) => Err(SpotifyError::InternalError(error)),
+        }
+    }
+    /// Fetches the current status from Spotify.
+    pub fn get_status(&self) -> Result<JsonValue> {
+        match self.connector.fetch_status() {
+            Ok(result) => Ok(result),
             Err(error) => Err(SpotifyError::InternalError(error)),
         }
     }

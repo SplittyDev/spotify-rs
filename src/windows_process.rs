@@ -1,14 +1,10 @@
-#![allow(dead_code)]
-
 use std::cmp::Ordering;
 use std::ffi::{CStr, CString};
 use std::mem::{zeroed, size_of};
-extern crate winapi;
-use self::winapi::minwindef::{DWORD, FALSE, TRUE};
-use self::winapi::winnt::{HANDLE, PROCESS_ALL_ACCESS};
-use self::winapi::tlhelp32::{PROCESSENTRY32, TH32CS_SNAPPROCESS};
-extern crate kernel32;
-use self::kernel32::{CreateToolhelp32Snapshot, Process32First, Process32Next, OpenProcess};
+use winapi::minwindef::{DWORD, FALSE, TRUE};
+use winapi::winnt::{HANDLE, PROCESS_ALL_ACCESS};
+use winapi::tlhelp32::{PROCESSENTRY32, TH32CS_SNAPPROCESS};
+use kernel32::{CreateToolhelp32Snapshot, Process32First, Process32Next, OpenProcess};
 
 /// The `WindowsProcess` struct.
 #[derive(Clone)]

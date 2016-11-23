@@ -22,5 +22,17 @@ fn main() {
             }
         }
     };
-    println!("It's working!");
+    let status = match spotify.get_status() {
+        Ok(result) => result,
+        Err(error) => {
+            println!("Unable to retrieve the Spotify status.\nError: {:?}", error);
+            std::process::exit(4);
+        }
+    };
+    println!("Connected: Spotify Client (Version {version})",
+             version = status["client_version"]);
+    println!("Currently playing: {track} by {artist} (Album: {album})",
+             track = status["track"]["track_resource"]["name"],
+             artist = status["track"]["artist_resource"]["name"],
+             album = status["track"]["album_resource"]["name"]);
 }
