@@ -3,6 +3,8 @@
 [![Crates.io](https://img.shields.io/crates/l/spotify.svg?style=flat-square)][crates-url]
 [![Crates.io](https://img.shields.io/crates/v/spotify.svg?style=flat-square)][crates-url]
 
+[Documentation][docs-url]
+
 Easy to use Spotify Local API abstraction library.
 
 ## What it is
@@ -114,3 +116,4 @@ That's it! Everything should work now.
 
 [travis-url]: https://travis-ci.org/SplittyDev/spotify-rs
 [crates-url]: https://crates.io/crates/spotify
+[docs-url]: https://splittydev.github.io/spotify-rs/spotify
