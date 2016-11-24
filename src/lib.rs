@@ -105,9 +105,3 @@ impl Spotify {
         WindowsProcess::find_by_name(process).is_some()
     }
 }
-
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn it_works() {}
-}

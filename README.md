@@ -21,7 +21,7 @@ sending stuff back to the client (e.g. make Spotify play a specific track).
 ## Examples
 The following is a minimal example to show you what's possible with spotify-rs.   
 Please note that this example code lacks error checking, it's really only a quick demonstration.
-```rust
+```rust,no_run
 extern crate spotify;
 use spotify::Spotify;
 
@@ -49,7 +49,7 @@ with proper error checking, which does the same as the example above, but safe! 
 
 I made error handling really easy, all you need to do is match on the error and   
 provide a few end-user-friendly clues. That's all!
-```rust
+```rust,no_run
 extern crate spotify;
 use spotify::{Spotify, SpotifyError};
 
