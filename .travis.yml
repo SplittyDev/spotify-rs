@@ -1,6 +1,8 @@
 language: rust
 rust:
   - stable
+  - beta
+  - nightly
 matrix:
   allow_features:
     - rust: nightly
@@ -8,10 +10,3 @@ script:
   - cargo build --verbose
   - cargo test --verbose
   - cargo doc
-sudo: required
-after_success: |
-  [ $TRAVIS_BRANCH = master ] &&
-  sudo pip install --upgrade pip &&
-  sudo pip install ghp-import2 &&
-  ghp-import -n target/doc &&
-  git push -qf https://${GITHUB_API_KEY}@github.com/${TRAVIS_REPO_SLUG}.git gh-pages
