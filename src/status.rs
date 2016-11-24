@@ -1,3 +1,10 @@
+//! The status module.
+//!
+//! This module contains methods to turn the JSON responses
+//! from the Spotify connector into easy-to-use structures.
+//!
+//! It also contains some extra abstractions, such as the `SimpleTrack` struct.
+
 use json::JsonValue;
 
 /// A Spotify status.
