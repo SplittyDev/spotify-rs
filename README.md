@@ -33,15 +33,17 @@ fn main() {
     let status = match spotify.get_status();
 
     // Display the Spotify Client version
-    println!("Spotify Client (Version {})", status.client_version);
+    println!("Spotify Client (Version {})", status.version());
              
     // Display the currently playing track
-    println!("Playing: '{track}' by '{artist}' ({album})",
-             track = status.track.track.name,
-             album = status.track.album.name,
-             artist = status.track.artist.name,
-    );
+    println!("Playing: {:#}", status.track());
 }
+```
+
+Example output:
+```
+Spotify Client (Version 1.0.42.151.g19de0aa6)
+Playing: Rick Astley - Never Gonna Give You Up
 ```
 
 For the sake of completeness I also have a complete example for you,   
@@ -86,19 +88,10 @@ fn main() {
     };
 
     // Display the Spotify Client version
-    println!("Spotify Client (Version {})", status.client_version);
+    println!("Spotify Client (Version {})", status.version());
             
     // Display the currently playing track
-    match status.track {
-        Some(res) => {
-            println!("Playing: '{track}' by '{artist}' ({album})",
-                track = res.track.name,
-                album = res.album.name,
-                artist = res.artist.name,
-            );
-        }
-        None => println!("No track is currently playing."),
-    };
+    println!("Playing: {:#}", status.track());
 }
 ```
 

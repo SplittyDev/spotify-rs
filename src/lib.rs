@@ -25,7 +25,7 @@ use status::SpotifyStatus;
 use json::JsonValue;
 
 /// The `Result` type used in this crate.
-type Result<T> = ::std::result::Result<T, SpotifyError>;
+type Result<T> = std::result::Result<T, SpotifyError>;
 
 /// The `SpotifyError` enum.
 #[derive(Debug)]
@@ -62,8 +62,6 @@ impl Spotify {
         Spotify::new_unchecked()
     }
     /// Constructs a new `Spotify`.
-    ///
-    /// Skips the checks and calls `Spotify::new_unchecked` directly.
     #[cfg(not(windows))]
     pub fn new() -> Result<Spotify> {
         Spotify::new_unchecked()
@@ -71,8 +69,8 @@ impl Spotify {
     /// Constructs a new `Spotify`.
     ///
     /// Skips the checks done in `Spotify::new`.
-    pub fn new_unchecked() -> Result<Spotify> {
-        match SpotifyConnector::new() {
+    fn new_unchecked() -> Result<Spotify> {
+        match SpotifyConnector::connect_new() {
             Ok(result) => Ok(Spotify { connector: result }),
             Err(error) => Err(SpotifyError::InternalError(error)),
         }
@@ -86,7 +84,7 @@ impl Spotify {
         Ok(SpotifyStatus::from(json))
     }
     /// Fetches the current status from Spotify.
-    pub fn get_status_object(&self) -> Result<JsonValue> {
+    fn get_status_object(&self) -> Result<JsonValue> {
         match self.connector.fetch_status_json() {
             Ok(result) => Ok(result),
             Err(error) => Err(SpotifyError::InternalError(error)),

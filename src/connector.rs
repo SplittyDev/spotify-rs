@@ -10,7 +10,7 @@ const HEADER_ORIGIN_HOST: &'static str = "embed.spotify.com";
 const SPOTIFY_URL_EMBED: &'static str = "https://embed.spotify.com";
 const SPOTIFY_URL_TOKEN: &'static str = "https://open.spotify.com/token";
 const SPOTIFY_URL_LOCAL: &'static str = "https://spotifyrs.spotilocal.com:4371";
-const REQUEST_CFID: &'static str = "simplecsrf/token.json";
+const REQUEST_CSRF: &'static str = "simplecsrf/token.json";
 const REQUEST_STATUS: &'static str = "remote/status.json";
 const REFERAL_TRACK: &'static str = "track/4uLU6hMCjMI75M1A2tKUQC";
 
@@ -27,10 +27,7 @@ pub enum InternalSpotifyError {
     // OAUth
     InvalidOAuthToken,
     // CSRF
-    CSRFTokenError(String),
     InvalidCSRFToken,
-    // Status
-    StatusParseError(json::Error),
     // Other
     IOError(::std::io::Error),
 }
@@ -48,7 +45,8 @@ pub struct SpotifyConnector {
 /// Implements `SpotifyConnector`.
 impl SpotifyConnector {
     /// Constructs a new `SpotifyConnector`.
-    pub fn new() -> Result<SpotifyConnector> {
+    /// Retrieves the OAuth and CSRF tokens in the process.
+    pub fn connect_new() -> Result<SpotifyConnector> {
         let client = match Client::new() {
             Ok(client) => client,
             Err(error) => return Err(InternalSpotifyError::ReqwestError(error)),
@@ -81,7 +79,7 @@ impl SpotifyConnector {
     }
     /// Fetches the CSRF token from Spotify.
     fn fetch_csrf_token(&self) -> Result<String> {
-        let json = match self.query(SPOTIFY_URL_LOCAL, REQUEST_CFID, false, false) {
+        let json = match self.query(SPOTIFY_URL_LOCAL, REQUEST_CSRF, false, false) {
             Ok(result) => result,
             Err(error) => return Err(error),
         };
@@ -105,7 +103,7 @@ impl SpotifyConnector {
         let timestamp = ::time::now_utc().to_timespec().sec;
         let arguments = {
             let delimiter = match query.contains("?") {
-                false => format!("?"),
+                false => "?".into(),
                 _ => String::default(),
             };
             let oauth_param = match with_oauth {

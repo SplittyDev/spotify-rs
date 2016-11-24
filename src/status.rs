@@ -30,10 +30,11 @@ pub struct SpotifyStatus {
     /// The Open Graph state.
     pub open_graph_state: OpenGraphState,
     /// The currently playing track.
-    pub track: Option<Track>,
+    pub track: Track,
 }
 
 /// A Spotify Open Graph state.
+#[derive(Clone)]
 pub struct OpenGraphState {
     /// Whether the current session is private.
     pub private_session: bool,
@@ -42,6 +43,7 @@ pub struct OpenGraphState {
 }
 
 /// A Spotify track.
+#[derive(Clone)]
 pub struct Track {
     /// The track.
     pub track: Resource,
@@ -56,6 +58,7 @@ pub struct Track {
 }
 
 /// A Spotify resource.
+#[derive(Clone)]
 pub struct Resource {
     /// The internal resource uri.
     pub uri: String,
@@ -66,16 +69,45 @@ pub struct Resource {
 }
 
 /// A Spotify resource location.
+#[derive(Clone)]
 pub struct ResourceLocation {
     /// The online resource url.
     pub og: String,
 }
 
+/// A simple track.
+/// Provides an abstraction over the more
+/// complicated and quite messy `Track` struct.
+#[derive(Clone)]
+pub struct SimpleTrack {
+    /// The track name.
+    pub name: String,
+    /// The album name.
+    pub album: String,
+    /// The artist name.
+    pub artist: String,
+}
+
 /// Transforms a JSON value into an owned String.
+#[inline]
 fn get_json_str(json: &JsonValue) -> String {
     match json.as_str() {
         Some(val) => val.to_owned(),
         None => String::default(),
+    }
+}
+
+/// Implements `SpotifyStatus`.
+impl SpotifyStatus {
+    /// Gets an easy-to-work-with abstraction over
+    /// the currently playing track, containing only
+    /// the names of the track, album and artist.
+    pub fn track(&self) -> SimpleTrack {
+        SimpleTrack::from(&self.track)
+    }
+    /// Gets the Spotify client version.
+    pub fn version(&self) -> String {
+        self.client_version.clone()
     }
 }
 
@@ -96,10 +128,7 @@ impl From<JsonValue> for SpotifyStatus {
             client_version: get_json_str(&json["client_version"]),
             playing_position: json["playing_position"].as_f32().unwrap_or(0f32),
             open_graph_state: OpenGraphState::from(&json["open_graph_state"]),
-            track: match json["track"].is_null() {
-                true => None,
-                false => Some(Track::from(&json["track"])),
-            },
+            track: Track::from(&json["track"]),
         }
     }
 }
@@ -142,5 +171,30 @@ impl<'a> From<&'a JsonValue> for Resource {
 impl<'a> From<&'a JsonValue> for ResourceLocation {
     fn from(json: &'a JsonValue) -> ResourceLocation {
         ResourceLocation { og: get_json_str(&json["og"]) }
+    }
+}
+
+/// Implements `From<Track>` for `SimpleTrack`.
+impl<'a> From<&'a Track> for SimpleTrack {
+    fn from(track: &'a Track) -> SimpleTrack {
+        SimpleTrack {
+            name: track.track.name.clone(),
+            album: track.album.name.clone(),
+            artist: track.artist.name.clone(),
+        }
+    }
+}
+
+/// Implements `From<SpotifyStatus>` for `SimpleTrack`.
+impl<'a> From<&'a SpotifyStatus> for SimpleTrack {
+    fn from(status: &'a SpotifyStatus) -> SimpleTrack {
+        SimpleTrack::from(&status.track)
+    }
+}
+
+/// Implements `fmt::Display` for `SimpleTrack`.
+impl ::std::fmt::Display for SimpleTrack {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        write!(f, "{} - {}", self.artist, self.name)
     }
 }
