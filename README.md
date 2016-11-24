@@ -30,17 +30,17 @@ fn main() {
     let spotify = Spotify::new().unwrap();
 
     // Fetch the current status from Spotify
-    let status = match spotify.get_status_object();
+    let status = match spotify.get_status();
 
     // Display the Spotify Client version
-    println!("Spotify Client (Version {version})",
-             version = status["client_version"]);
+    println!("Spotify Client (Version {})", status.client_version);
              
     // Display the currently playing track
-    println!("Currently playing: {track} by {artist} (Album: {album})",
-             track = status["track"]["track_resource"]["name"],
-             artist = status["track"]["artist_resource"]["name"],
-             album = status["track"]["album_resource"]["name"]);
+    println!("Playing: '{track}' by '{artist}' ({album})",
+             track = status.track.track.name,
+             album = status.track.album.name,
+             artist = status.track.artist.name,
+    );
 }
 ```
 
@@ -77,7 +77,7 @@ fn main() {
     };
 
     // Fetch the current status from Spotify
-    let status = match spotify.get_status_object() {
+    let status = match spotify.get_status() {
         Ok(result) => result,
         Err(error) => {
             println!("Unable to retrieve the Spotify status.\nError: {:?}", error);
@@ -86,14 +86,19 @@ fn main() {
     };
 
     // Display the Spotify Client version
-    println!("Spotify Client (Version {version})",
-             version = status["client_version"]);
+    println!("Spotify Client (Version {})", status.client_version);
             
     // Display the currently playing track
-    println!("Currently playing: {track} by {artist} (Album: {album})",
-             track = status["track"]["track_resource"]["name"],
-             artist = status["track"]["artist_resource"]["name"],
-             album = status["track"]["album_resource"]["name"]);
+    match status.track {
+        Some(res) => {
+            println!("Playing: '{track}' by '{artist}' ({album})",
+                track = res.track.name,
+                album = res.album.name,
+                artist = res.artist.name,
+            );
+        }
+        None => println!("No track is currently playing."),
+    };
 }
 ```
 
