@@ -37,7 +37,7 @@ fn main() {
     let spotify = Spotify::new().unwrap();
 
     // Fetch the current status from Spotify
-    let status = match spotify.get_status();
+    let status = spotify.get_status();
 
     // Display the Spotify Client version
     println!("Spotify Client (Version {})", status.version());
