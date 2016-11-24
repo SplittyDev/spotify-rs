@@ -18,11 +18,13 @@ mod connector;
 pub mod status;
 
 // Imports
+use std::thread::{self, JoinHandle};
+use std::time::Duration;
+use std::sync::Arc;
 #[cfg(windows)]
 use windows_process::WindowsProcess;
 use connector::{SpotifyConnector, InternalSpotifyError};
-use status::SpotifyStatus;
-use json::JsonValue;
+use status::{SpotifyStatus, SpotifyStatusChange};
 
 /// The `Result` type used in this crate.
 type Result<T> = std::result::Result<T, SpotifyError>;
@@ -39,10 +41,17 @@ pub enum SpotifyError {
 }
 
 /// The Spotify API.
-#[allow(dead_code)]
 pub struct Spotify {
     /// The Spotify connector.
     connector: SpotifyConnector,
+}
+
+/// Fetches the current status from Spotify.
+fn get_status(connector: &SpotifyConnector) -> Result<SpotifyStatus> {
+    match connector.fetch_status_json() {
+        Ok(result) => Ok(SpotifyStatus::from(result)),
+        Err(error) => Err(SpotifyError::InternalError(error)),
+    }
 }
 
 /// Implements `Spotify`.
@@ -75,20 +84,39 @@ impl Spotify {
             Err(error) => Err(SpotifyError::InternalError(error)),
         }
     }
-    /// Fetches the current status from Spotify.
-    pub fn get_status(&self) -> Result<SpotifyStatus> {
-        let json = match self.get_status_object() {
-            Ok(result) => result,
-            Err(error) => return Err(error),
-        };
-        Ok(SpotifyStatus::from(json))
+    /// Polls the Spotify status and passes it,
+    /// to the specified closure together with a structure
+    /// indicating which fields changed since the last update.
+    pub fn poll<F: 'static>(self, f: F) -> JoinHandle<()>
+        where F: Fn(SpotifyStatus, SpotifyStatusChange) -> bool,
+              F: std::marker::Send
+    {
+        let connector = Arc::new(self.connector);
+        thread::spawn(move || {
+            let sleep_time = Duration::from_millis(250);
+            let mut last: Option<SpotifyStatus> = None;
+            let mut curr: Option<SpotifyStatus>;
+            loop {
+                curr = get_status(&connector).ok();
+                if curr.is_some() && last.is_none() {
+                    if !f(curr.clone().unwrap(), SpotifyStatusChange::new_true()) {
+                        break;
+                    }
+                } else if curr.is_some() && last.is_some() {
+                    let curr = curr.clone().unwrap();
+                    let last = last.unwrap();
+                    if !f(curr.clone(), SpotifyStatusChange::from((curr, last))) {
+                        break;
+                    }
+                }
+                last = curr.clone();
+                thread::sleep(sleep_time);
+            }
+        })
     }
-    /// Fetches the current status from Spotify.
-    fn get_status_object(&self) -> Result<JsonValue> {
-        match self.connector.fetch_status_json() {
-            Ok(result) => Ok(result),
-            Err(error) => Err(SpotifyError::InternalError(error)),
-        }
+    /// Fetches the current status from the Spotify client.
+    pub fn get_status(&self) -> Result<SpotifyStatus> {
+        get_status(&self.connector)
     }
     /// Tests whether the Spotify process is running.
     #[cfg(windows)]

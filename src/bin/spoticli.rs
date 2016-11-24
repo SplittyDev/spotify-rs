@@ -21,13 +21,20 @@ fn main() {
             }
         }
     };
-    let status = match spotify.get_status() {
-        Ok(result) => result,
-        Err(error) => {
-            println!("Unable to retrieve the Spotify status.\nError: {:?}", error);
-            std::process::exit(4);
+    let reactor = spotify.poll(|status, change| {
+        if change.client_version {
+            println!("Spotify Client (Version {})", status.version());
         }
-    };
-    println!("Spotify Client (Version {})", status.version());
-    println!("Playing: {:#}", status.track());
+        if change.track {
+            println!("Now playing: {:#}", status.track());
+        }
+        if change.volume {
+            println!("Volume: {}%", (status.volume * 100f32).round());
+        }
+        true
+    });
+    if reactor.join().ok().is_none() {
+        println!("Unable to join into the live-update.");
+        std::process::exit(4);
+    }
 }

@@ -7,7 +7,40 @@
 
 use json::JsonValue;
 
+/// A change in the Spotify status.
+pub struct SpotifyStatusChange {
+    /// Indicates a change in the volume.
+    pub volume: bool,
+    /// Indicates a change in the online status.
+    pub online: bool,
+    /// Indicates a change in the protocol version.
+    pub version: bool,
+    /// Indicates a change in the running state.
+    pub running: bool,
+    /// Indicates a change in the playing state.
+    pub playing: bool,
+    /// Indicates a change in the shuffle mode.
+    pub shuffle: bool,
+    /// Indicates a change in the server time.
+    pub server_time: bool,
+    /// Indicates a change in the play enabled state.
+    pub play_enabled: bool,
+    /// Indicates a change in the prev enabled state.
+    pub prev_enabled: bool,
+    /// Indicates a change in the next enabled state.
+    pub next_enabled: bool,
+    /// Indicates a change in the client version.
+    pub client_version: bool,
+    /// Indicates a change in the playing position.
+    pub playing_position: bool,
+    /// Indicates a change in the open graph data.
+    pub open_graph_state: bool,
+    /// Indicates a change in the track.
+    pub track: bool,
+}
+
 /// A Spotify status.
+#[derive(Debug, Clone, PartialEq)]
 pub struct SpotifyStatus {
     /// The volume.
     /// Valid values are [0.0...1.0].
@@ -41,7 +74,7 @@ pub struct SpotifyStatus {
 }
 
 /// A Spotify Open Graph state.
-#[derive(Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct OpenGraphState {
     /// Whether the current session is private.
     pub private_session: bool,
@@ -50,7 +83,7 @@ pub struct OpenGraphState {
 }
 
 /// A Spotify track.
-#[derive(Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Track {
     /// The track.
     pub track: Resource,
@@ -65,7 +98,7 @@ pub struct Track {
 }
 
 /// A Spotify resource.
-#[derive(Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Resource {
     /// The internal resource uri.
     pub uri: String,
@@ -76,7 +109,7 @@ pub struct Resource {
 }
 
 /// A Spotify resource location.
-#[derive(Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct ResourceLocation {
     /// The online resource url.
     pub og: String,
@@ -85,7 +118,7 @@ pub struct ResourceLocation {
 /// A simple track.
 /// Provides an abstraction over the more
 /// complicated and quite messy `Track` struct.
-#[derive(Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct SimpleTrack {
     /// The track name.
     pub name: String,
@@ -203,5 +236,55 @@ impl<'a> From<&'a SpotifyStatus> for SimpleTrack {
 impl ::std::fmt::Display for SimpleTrack {
     fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
         write!(f, "{} - {}", self.artist, self.name)
+    }
+}
+
+/// Implements `SpotifyStatusChange`.
+impl SpotifyStatusChange {
+    /// Constructs a new `SpotifyStatusChange` with all fields set to true.
+    pub fn new_true() -> SpotifyStatusChange {
+        SpotifyStatusChange {
+            volume: true,
+            online: true,
+            version: true,
+            running: true,
+            playing: true,
+            shuffle: true,
+            server_time: true,
+            play_enabled: true,
+            prev_enabled: true,
+            next_enabled: true,
+            client_version: true,
+            playing_position: true,
+            open_graph_state: true,
+            track: true,
+        }
+    }
+}
+
+/// Implements `From<(SpotifyStatus, SpotifyStatus)>` for `SpotifyStatusChange`.
+impl From<(SpotifyStatus, SpotifyStatus)> for SpotifyStatusChange {
+    fn from(set: (SpotifyStatus, SpotifyStatus)) -> SpotifyStatusChange {
+        let curr = set.0;
+        let last = set.1;
+        macro_rules! status_compare_field {
+            ($field:ident) => (curr.$field != last.$field)
+        }
+        SpotifyStatusChange {
+            volume: status_compare_field!(volume),
+            online: status_compare_field!(online),
+            version: status_compare_field!(version),
+            running: status_compare_field!(running),
+            playing: status_compare_field!(playing),
+            shuffle: status_compare_field!(shuffle),
+            server_time: status_compare_field!(server_time),
+            play_enabled: status_compare_field!(play_enabled),
+            prev_enabled: status_compare_field!(prev_enabled),
+            next_enabled: status_compare_field!(next_enabled),
+            client_version: status_compare_field!(client_version),
+            playing_position: status_compare_field!(playing_position),
+            open_graph_state: status_compare_field!(open_graph_state),
+            track: status_compare_field!(track),
+        }
     }
 }

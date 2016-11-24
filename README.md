@@ -15,6 +15,11 @@ You can easily retrieve the currently playing track, the artist who made it,
 the album it's from, the version of the Spotify Client, whether the Spotify Client   
 is online or offline, etc.
 
+Since version 0.4.0, spotify-rs also supports asynchronous polling, so now   
+you can just register a callback, sit back and watch your application deliver   
+live information about the track you're currently playing, the current volume,   
+or, really, anything else supported by the Spotify Local API.
+
 ## What is isn't
 Spotify-rs isn't some kind of hack. It just uses Spotify's own local server.   
 It only allows fetching information from the client and, maybe in the future,   
@@ -48,11 +53,8 @@ Spotify Client (Version 1.0.42.151.g19de0aa6)
 Playing: Rick Astley - Never Gonna Give You Up
 ```
 
-For the sake of completeness I also have a complete example for you,   
-with proper error checking, which does the same as the example above, but safe! :P
-
-I made error handling really easy, all you need to do is match on the error and   
-provide a few end-user-friendly clues. That's all!
+Of course I also have a complete example for you,   
+with proper error checking and long polling! :P
 ```rust,no_run
 extern crate spotify;
 use spotify::{Spotify, SpotifyError};
@@ -80,21 +82,50 @@ fn main() {
         }
     };
 
-    // Fetch the current status from Spotify
-    let status = match spotify.get_status() {
-        Ok(result) => result,
-        Err(error) => {
-            println!("Unable to retrieve the Spotify status.\nError: {:?}", error);
-            std::process::exit(4);
+    // Start polling.
+    // Updates the state every 250ms.
+    // 
+    // The 'status' variable holds the `SpotifyStatus`,
+    // the 'change' variable contains booleans to indicate which fields
+    // had changed since the last update.
+    let reactor = spotify.poll(|status, change| {
+        // Print the Spotify Client version on change.
+        if change.client_version {
+            println!("Spotify Client (Version {})", status.version());
         }
-    };
+        // Print the currently playing track on change.
+        if change.track {
+            println!("Now playing: {:#}", status.track());
+        }
+        // Print the current volume on change.
+        if change.volume {
+            println!("Volume: {}%", (status.volume * 100f32).round());
+        }
 
-    // Display the Spotify Client version
-    println!("Spotify Client (Version {})", status.version());
-            
-    // Display the currently playing track
-    println!("Playing: {:#}", status.track());
+        // Returning true will continue polling, whereas returning
+        // false will stop polling and return from the thread.
+        true
+    });
+
+    // Join the reactor thread so the application
+    // doesn't close before receiving any data.
+    if reactor.join().ok().is_none() {
+        println!("Unable to join into the live-update.");
+        std::process::exit(4);
+    }
 }
+```
+
+Example output:
+```
+Spotify Client (Version 1.0.42.151.g19de0aa6)
+Now playing: Tim Minchin - White Wine In The Sun
+Volume: 100%
+Now playing: Tim Minchin - Encore
+Volume: 50%
+Volume: 76%
+Now playing: Tim Minchin - Ready For This ?
+Volume: 100%
 ```
 
 ## F.A.Q.
