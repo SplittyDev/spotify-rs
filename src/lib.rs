@@ -15,7 +15,7 @@ extern crate json;
 #[cfg(windows)]
 mod windows_process;
 mod connector;
-mod status;
+pub mod status;
 
 // Imports
 #[cfg(windows)]
