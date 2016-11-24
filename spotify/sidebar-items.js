@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["SpotifyError","The `SpotifyError` enum."]],"mod":[["status","The status module."]],"struct":[["Spotify","The Spotify API."]]});

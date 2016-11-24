@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["OpenGraphState","A Spotify Open Graph state."],["Resource","A Spotify resource."],["ResourceLocation","A Spotify resource location."],["SimpleTrack","A simple track. Provides an abstraction over the more complicated and quite messy `Track` struct."],["SpotifyStatus","A Spotify status."],["Track","A Spotify track."]]});

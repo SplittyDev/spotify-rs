@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `SpotifyStatus` struct in crate `spotify`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, SpotifyStatus">
+
+    <title>spotify::status::SpotifyStatus - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../../main.css">
+    
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'><a href='../index.html'>spotify</a>::<wbr><a href='index.html'>status</a></p><script>window.sidebarCurrent = {name: 'SpotifyStatus', ty: 'struct', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content struct">
+<h1 class='fqn'><span class='in-band'>Struct <a href='../index.html'>spotify</a>::<wbr><a href='index.html'>status</a>::<wbr><a class='struct' href=''>SpotifyStatus</a></span><span class='out-of-band'><span id='render-detail'>
+                   <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                       [<span class='inner'>&#x2212;</span>]
+                   </a>
+               </span><a id='src-114' class='srclink' href='../../src/spotify/src/status.rs.html#11-41' title='goto source code'>[src]</a></span></h1>
+<pre class='rust struct'>pub struct SpotifyStatus {
+    pub volume: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.f32.html'>f32</a>,
+    pub online: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a>,
+    pub version: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.i32.html'>i32</a>,
+    pub running: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a>,
+    pub playing: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a>,
+    pub shuffle: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a>,
+    pub server_time: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.i64.html'>i64</a>,
+    pub play_enabled: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a>,
+    pub prev_enabled: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a>,
+    pub next_enabled: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a>,
+    pub client_version: <a class='struct' href='https://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>,
+    pub playing_position: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.f32.html'>f32</a>,
+    pub open_graph_state: <a class='struct' href='../../spotify/status/struct.OpenGraphState.html' title='spotify::status::OpenGraphState'>OpenGraphState</a>,
+    pub track: <a class='struct' href='../../spotify/status/struct.Track.html' title='spotify::status::Track'>Track</a>,
+}</pre><div class='docblock'><p>A Spotify status.</p>
+</div><h2 class='fields'>Fields</h2><span id='structfield.volume' class='structfield'>
+                           <span id='volume.v' class='invisible'>
+                           <code>volume: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.f32.html'>f32</a></code>
+                           </span></span><span class='stab '></span><div class='docblock'><p>The volume.
+Valid values are [0.0...1.0].</p>
+</div><span id='structfield.online' class='structfield'>
+                           <span id='online.v' class='invisible'>
+                           <code>online: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code>
+                           </span></span><span class='stab '></span><div class='docblock'><p>Whether the client is online.</p>
+</div><span id='structfield.version' class='structfield'>
+                           <span id='version.v' class='invisible'>
+                           <code>version: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.i32.html'>i32</a></code>
+                           </span></span><span class='stab '></span><div class='docblock'><p>The protocol version.</p>
+</div><span id='structfield.running' class='structfield'>
+                           <span id='running.v' class='invisible'>
+                           <code>running: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code>
+                           </span></span><span class='stab '></span><div class='docblock'><p>Whether the client is running.</p>
+</div><span id='structfield.playing' class='structfield'>
+                           <span id='playing.v' class='invisible'>
+                           <code>playing: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code>
+                           </span></span><span class='stab '></span><div class='docblock'><p>Whether a track is currently playing.</p>
+</div><span id='structfield.shuffle' class='structfield'>
+                           <span id='shuffle.v' class='invisible'>
+                           <code>shuffle: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code>
+                           </span></span><span class='stab '></span><div class='docblock'><p>Whether shuffle mode is activated.</p>
+</div><span id='structfield.server_time' class='structfield'>
+                           <span id='server_time.v' class='invisible'>
+                           <code>server_time: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.i64.html'>i64</a></code>
+                           </span></span><span class='stab '></span><div class='docblock'><p>The server time as a unix timestamp.</p>
+</div><span id='structfield.play_enabled' class='structfield'>
+                           <span id='play_enabled.v' class='invisible'>
+                           <code>play_enabled: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code>
+                           </span></span><span class='stab '></span><div class='docblock'><p>Whether playing a track is enabled.</p>
+</div><span id='structfield.prev_enabled' class='structfield'>
+                           <span id='prev_enabled.v' class='invisible'>
+                           <code>prev_enabled: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code>
+                           </span></span><span class='stab '></span><div class='docblock'><p>Whether playing the previous track is enabled.</p>
+</div><span id='structfield.next_enabled' class='structfield'>
+                           <span id='next_enabled.v' class='invisible'>
+                           <code>next_enabled: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code>
+                           </span></span><span class='stab '></span><div class='docblock'><p>Whether playing the next track is enabled.</p>
+</div><span id='structfield.client_version' class='structfield'>
+                           <span id='client_version.v' class='invisible'>
+                           <code>client_version: <a class='struct' href='https://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a></code>
+                           </span></span><span class='stab '></span><div class='docblock'><p>The client version.</p>
+</div><span id='structfield.playing_position' class='structfield'>
+                           <span id='playing_position.v' class='invisible'>
+                           <code>playing_position: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.f32.html'>f32</a></code>
+                           </span></span><span class='stab '></span><div class='docblock'><p>The current playing position.</p>
+</div><span id='structfield.open_graph_state' class='structfield'>
+                           <span id='open_graph_state.v' class='invisible'>
+                           <code>open_graph_state: <a class='struct' href='../../spotify/status/struct.OpenGraphState.html' title='spotify::status::OpenGraphState'>OpenGraphState</a></code>
+                           </span></span><span class='stab '></span><div class='docblock'><p>The Open Graph state.</p>
+</div><span id='structfield.track' class='structfield'>
+                           <span id='track.v' class='invisible'>
+                           <code>track: <a class='struct' href='../../spotify/status/struct.Track.html' title='spotify::status::Track'>Track</a></code>
+                           </span></span><span class='stab '></span><div class='docblock'><p>The currently playing track.</p>
+</div><h2 id='methods'>Methods</h2><h3 class='impl'><span class='in-band'><code>impl <a class='struct' href='../../spotify/status/struct.SpotifyStatus.html' title='spotify::status::SpotifyStatus'>SpotifyStatus</a></code></span><span class='out-of-band'><div class='ghost'></div><a id='src-181' class='srclink' href='../../src/spotify/src/status.rs.html#108-119' title='goto source code'>[src]</a></span></h3>
+<div class='docblock'><p>Implements <code>SpotifyStatus</code>.</p>
+</div><div class='impl-items'><h4 id='method.track' class='method'><span id='track.v-1' class='invisible'><code>fn <a href='#method.track' class='fnname'>track</a>(&amp;self) -&gt; <a class='struct' href='../../spotify/status/struct.SimpleTrack.html' title='spotify::status::SimpleTrack'>SimpleTrack</a></code></span></h4>
+<div class='docblock'><p>Gets an easy-to-work-with abstraction over
+the currently playing track, containing only
+the names of the track, album and artist.</p>
+</div><h4 id='method.version' class='method'><span id='version.v-1' class='invisible'><code>fn <a href='#method.version' class='fnname'>version</a>(&amp;self) -&gt; <a class='struct' href='https://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a></code></span></h4>
+<div class='docblock'><p>Gets the Spotify client version.</p>
+</div></div><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><span class='in-band'><code>impl <a class='trait' href='https://doc.rust-lang.org/nightly/core/convert/trait.From.html' title='core::convert::From'>From</a>&lt;<a class='enum' href='../../json/value/enum.JsonValue.html' title='json::value::JsonValue'>JsonValue</a>&gt; for <a class='struct' href='../../spotify/status/struct.SpotifyStatus.html' title='spotify::status::SpotifyStatus'>SpotifyStatus</a></code></span><span class='out-of-band'><div class='ghost'></div><a id='src-186' class='srclink' href='../../src/spotify/src/status.rs.html#122-141' title='goto source code'>[src]</a></span></h3>
+<div class='docblock'><p>Implements <code>From&lt;JsonValue&gt;</code> for <code>SpotifyStatus</code>.</p>
+</div><div class='impl-items'><h4 id='method.from' class='method'><span id='from.v' class='invisible'><code>fn <a href='https://doc.rust-lang.org/nightly/core/convert/trait.From.html#tymethod.from' class='fnname'>from</a>(json: <a class='enum' href='../../json/value/enum.JsonValue.html' title='json::value::JsonValue'>JsonValue</a>) -&gt; <a class='struct' href='../../spotify/status/struct.SpotifyStatus.html' title='spotify::status::SpotifyStatus'>SpotifyStatus</a></code></span></h4>
+<div class='docblock'><p>Performs the conversion.</p>
+</div></div></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                    <dt>+</dt>
+                    <dd>Collapse/expand all sections</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../../";
+        window.currentCrate = "spotify";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../../jquery.js"></script>
+    <script src="../../main.js"></script>
+    
+    <script defer src="../../search-index.js"></script>
+</body>
+</html>
