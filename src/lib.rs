@@ -87,7 +87,7 @@ impl Spotify {
     }
     /// Fetches the current status from Spotify.
     pub fn get_status_object(&self) -> Result<JsonValue> {
-        match self.connector.fetch_status() {
+        match self.connector.fetch_status_json() {
             Ok(result) => Ok(result),
             Err(error) => Err(SpotifyError::InternalError(error)),
         }

@@ -28,6 +28,15 @@ fn main() {
             std::process::exit(4);
         }
     };
-    println!("Spotify Client (Version {version})",
-             version = status.client_version);
+    println!("Spotify Client (Version {})", status.client_version);
+    match status.track {
+        Some(res) => {
+            println!("Playing: '{track}' by '{artist}' ({album})",
+                track = res.track.name,
+                album = res.album.name,
+                artist = res.artist.name,
+            );
+        }
+        None => println!("No track is currently playing."),
+    };
 }

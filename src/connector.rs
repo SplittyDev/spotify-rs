@@ -1,5 +1,5 @@
 use std::io::Read;
-use reqwest::Client;
+use reqwest::{self, Client};
 use reqwest::header::{Origin, Referer, UserAgent};
 use json::{self, JsonValue};
 
@@ -21,12 +21,12 @@ type Result<T> = ::std::result::Result<T, InternalSpotifyError>;
 #[derive(Debug)]
 pub enum InternalSpotifyError {
     // Reqwest
-    ReqwestError(::reqwest::Error),
+    ReqwestError(reqwest::Error),
+    // JSON
+    JSONParseError(json::Error),
     // OAUth
-    OAuthTokenParseError(json::Error),
     InvalidOAuthToken,
     // CSRF
-    CSRFTokenParseError(json::Error),
     CSRFTokenError(String),
     InvalidCSRFToken,
     // Status
@@ -70,59 +70,41 @@ impl SpotifyConnector {
     }
     /// Fetches the OAuth token from Spotify.
     fn fetch_oauth_token(&self) -> Result<String> {
-        let mut resp =
-            match self.client.get(SPOTIFY_URL_TOKEN).header(UserAgent(HEADER_UA.into())).send() {
-                Ok(resp) => resp,
-                Err(err) => return Err(InternalSpotifyError::ReqwestError(err)),
-            };
-        let json_data = {
-            let mut json_str = String::new();
-            if let Err(error) = resp.read_to_string(&mut json_str) {
-                return Err(InternalSpotifyError::IOError(error));
-            }
-            match json::parse(json_str.as_ref()) {
-                Ok(data) => data,
-                Err(err) => return Err(InternalSpotifyError::OAuthTokenParseError(err)),
-            }
+        let json = match self.query(SPOTIFY_URL_TOKEN, "", false, false) {
+            Ok(result) => result,
+            Err(error) => return Err(error),
         };
-        match json_data["t"].as_str() {
+        match json["t"].as_str() {
             Some(token) => Ok(token.to_owned()),
             None => Err(InternalSpotifyError::InvalidOAuthToken),
         }
     }
     /// Fetches the CSRF token from Spotify.
     fn fetch_csrf_token(&self) -> Result<String> {
-        let resp = match self.query(REQUEST_CFID, false, false) {
-            Ok(resp) => resp,
-            Err(err) => return Err(err),
+        let json = match self.query(SPOTIFY_URL_LOCAL, REQUEST_CFID, false, false) {
+            Ok(result) => result,
+            Err(error) => return Err(error),
         };
-        let json_data = {
-            match json::parse(resp.as_ref()) {
-                Ok(data) => data,
-                Err(err) => return Err(InternalSpotifyError::CSRFTokenParseError(err)),
-            }
-        };
-        match json_data["token"].as_str() {
+        match json["token"].as_str() {
             Some(token) => Ok(token.to_owned()),
             None => Err(InternalSpotifyError::InvalidCSRFToken),
         }
     }
     /// Fetches the current status from Spotify.
-    pub fn fetch_status(&self) -> Result<JsonValue> {
-        let resp = match self.query(REQUEST_STATUS, true, true) {
-            Ok(resp) => resp,
-            Err(err) => return Err(err),
-        };
-        match json::parse(resp.as_ref()) {
-            Ok(data) => Ok(data),
-            Err(err) => return Err(InternalSpotifyError::StatusParseError(err)),
-        }
+    pub fn fetch_status_json(&self) -> Result<JsonValue> {
+        self.query(SPOTIFY_URL_LOCAL, REQUEST_STATUS, true, true)
     }
-    /// Queries the local Spotify server.
-    fn query(&self, request: &str, with_oauth: bool, with_cfid: bool) -> Result<String> {
+    /// Queries the specified base url with the specified query.
+    /// Optionally includes the OAuth and/or CSRF token in the query.
+    fn query(&self,
+             base: &str,
+             query: &str,
+             with_oauth: bool,
+             with_csrf: bool)
+             -> Result<JsonValue> {
         let timestamp = ::time::now_utc().to_timespec().sec;
         let arguments = {
-            let delimiter = match request.contains("?") {
+            let delimiter = match query.contains("?") {
                 false => format!("?"),
                 _ => String::default(),
             };
@@ -130,32 +112,36 @@ impl SpotifyConnector {
                 true => format!("&oauth={}", self.oauth_token),
                 _ => String::default(),
             };
-            let cfid_param = match with_cfid {
+            let csrf_param = match with_csrf {
                 true => format!("&csrf={}", self.csrf_token),
                 _ => String::default(),
             };
-            format!("{}&ref=&cors=&_={ts}{oauth}{cfid}",
+            format!("{}&ref=&cors=&_={ts}{oauth}{csrf}",
                     delimiter,
                     ts = timestamp,
                     oauth = oauth_param,
-                    cfid = cfid_param)
+                    csrf = csrf_param)
         };
-        let url = format!("{}/{}{}", SPOTIFY_URL_LOCAL, request, arguments);
+        let url = format!("{}/{}{}", base, query, arguments);
         let response = {
             let mut content = String::new();
             let mut resp = match self.client
                 .get::<&str>(url.as_ref())
+                .header(UserAgent(HEADER_UA.into()))
                 .header(Origin::new(HEADER_ORIGIN_SCHEME, HEADER_ORIGIN_HOST, None))
                 .header(Referer(format!("{}/{}", SPOTIFY_URL_EMBED, REFERAL_TRACK)))
                 .send() {
-                Ok(resp) => resp,
-                Err(err) => return Err(InternalSpotifyError::ReqwestError(err)),
+                Ok(result) => result,
+                Err(error) => return Err(InternalSpotifyError::ReqwestError(error)),
             };
             match resp.read_to_string(&mut content) {
                 Ok(_) => content,
                 Err(error) => return Err(InternalSpotifyError::IOError(error)),
             }
         };
-        Ok(response)
+        match json::parse(response.as_ref()) {
+            Ok(result) => Ok(result),
+            Err(error) => Err(InternalSpotifyError::JSONParseError(error)),
+        }
     }
 }
