@@ -7,23 +7,20 @@
 
 Easy to use Spotify Local API abstraction library.
 
-## What it is
+## What can I do with it
 Spotify-rs provides an easy-to-use abstraction over the Spotify Local API.   
-It is made for fetching information from the local Spotify Client.
+It is made for communicating with the local Spotify client in a straightforward way.
 
 You can easily retrieve the currently playing track, the artist who made it,   
 the album it's from, the version of the Spotify Client, whether the Spotify Client   
 is online or offline, etc.
 
-Since version 0.4.0, spotify-rs also supports asynchronous polling, so now   
+Since version 0.4.0, spotify-rs supports asynchronous polling, so now   
 you can just register a callback, sit back and watch your application deliver   
 live information about the track you're currently playing, the current volume,   
 or, really, anything else supported by the Spotify Local API.
 
-## What is isn't
-Spotify-rs isn't some kind of hack. It just uses Spotify's own local server.   
-It only allows fetching information from the client and, maybe in the future,   
-sending stuff back to the client (e.g. make Spotify play a specific track).
+Since version 0.5.0, spotify-rs can queue and play songs on the local Spotify client!
 
 ## Examples
 The following is a minimal example to show you what's possible with spotify-rs.   
@@ -34,10 +31,10 @@ use spotify::Spotify;
 
 fn main() {
     // Grab an instance of the Spotify API
-    let spotify = Spotify::new().unwrap();
+    let spotify = Spotify::connect().unwrap();
 
     // Fetch the current status from Spotify
-    let status = spotify.get_status();
+    let status = spotify.status();
 
     // Display the Spotify Client version
     println!("Spotify Client (Version {})", status.version());
@@ -61,7 +58,7 @@ use spotify::{Spotify, SpotifyError};
 
 fn main() {
     // Grab an instance of the Spotify API.
-    let spotify = match Spotify::new() {
+    let spotify = match Spotify::connect() {
         Ok(result) => result,
         Err(error) => {
             // Display a nice end-user-friendly error message
@@ -99,7 +96,7 @@ fn main() {
         }
         // Print the current volume on change.
         if change.volume {
-            println!("Volume: {}%", (status.volume * 100f32).round());
+            println!("Volume: {}%", status.volume_percentage());
         }
 
         // Returning true will continue polling, whereas returning

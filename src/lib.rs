@@ -20,7 +20,6 @@ pub mod status;
 // Imports
 use std::thread::{self, JoinHandle};
 use std::time::Duration;
-use std::sync::Arc;
 #[cfg(windows)]
 use windows_process::WindowsProcess;
 use connector::{SpotifyConnector, InternalSpotifyError};
@@ -56,12 +55,15 @@ fn get_status(connector: &SpotifyConnector) -> Result<SpotifyStatus> {
 
 /// Implements `Spotify`.
 impl Spotify {
-    /// Constructs a new `Spotify`.
-    ///
-    /// Does additional checks to verify that Spotify
-    /// and SpotifyWebHelper are running.
+    /// Connects to the local Spotify client.
     #[cfg(windows)]
-    pub fn new() -> Result<Spotify> {
+    pub fn connect() -> Result<Spotify> {
+        // TODO:
+        // At some point, the connector should automatically
+        // open Spotify in the case  that Spotify is closed.
+        // That would also be a much better cross-platform solution,
+        // because it would work on Linux and macOS and make
+        // the dependency on winapi and kernel32-sys unnecessary.
         if !Spotify::spotify_alive() {
             return Err(SpotifyError::ClientNotRunning);
         }
@@ -70,34 +72,32 @@ impl Spotify {
         }
         Spotify::new_unchecked()
     }
-    /// Constructs a new `Spotify`.
+    /// Connects to the local Spotify client.
     #[cfg(not(windows))]
-    pub fn new() -> Result<Spotify> {
+    pub fn connect() -> Result<Spotify> {
         Spotify::new_unchecked()
     }
-    /// Constructs a new `Spotify`.
-    ///
-    /// Skips the checks done in `Spotify::new`.
+    /// Constructs a new `self::Result<Spotify>`.
     fn new_unchecked() -> Result<Spotify> {
         match SpotifyConnector::connect_new() {
             Ok(result) => Ok(Spotify { connector: result }),
             Err(error) => Err(SpotifyError::InternalError(error)),
         }
     }
-    /// Polls the Spotify status and passes it,
-    /// to the specified closure together with a structure
-    /// indicating which fields changed since the last update.
-    pub fn poll<F: 'static>(self, f: F) -> JoinHandle<()>
+    /// Moves `self` to a new thread and begins polling the
+    /// client status. Sends the updated status to the specified
+    /// closure, together with information of which fields had changed
+    /// since the last update. Returns the `JoinHandle` of the new thread.
+    pub fn poll<'a, F: 'static>(self, f: F) -> JoinHandle<()>
         where F: Fn(SpotifyStatus, SpotifyStatusChange) -> bool,
               F: std::marker::Send
     {
-        let connector = Arc::new(self.connector);
         thread::spawn(move || {
             let sleep_time = Duration::from_millis(250);
             let mut last: Option<SpotifyStatus> = None;
             let mut curr: Option<SpotifyStatus>;
             loop {
-                curr = get_status(&connector).ok();
+                curr = get_status(&self.connector).ok();
                 if curr.is_some() && last.is_none() {
                     if !f(curr.clone().unwrap(), SpotifyStatusChange::new_true()) {
                         break;
@@ -115,8 +115,12 @@ impl Spotify {
         })
     }
     /// Fetches the current status from the Spotify client.
-    pub fn get_status(&self) -> Result<SpotifyStatus> {
+    pub fn status(&self) -> Result<SpotifyStatus> {
         get_status(&self.connector)
+    }
+    /// Optionally plays a track or adds it to the queue.
+    pub fn play(&self, track: String, queue: bool) -> bool {
+        self.connector.request_play(track, queue)
     }
     /// Tests whether the Spotify process is running.
     #[cfg(windows)]

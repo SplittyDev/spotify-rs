@@ -2,7 +2,7 @@ extern crate spotify;
 use spotify::{Spotify, SpotifyError};
 
 fn main() {
-    let spotify = match Spotify::new() {
+    let spotify = match Spotify::connect() {
         Ok(result) => result,
         Err(error) => {
             match error {
@@ -27,9 +27,6 @@ fn main() {
         }
         if change.track {
             println!("Now playing: {:#}", status.track());
-        }
-        if change.volume {
-            println!("Volume: {}%", (status.volume * 100f32).round());
         }
         true
     });

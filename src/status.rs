@@ -6,6 +6,7 @@
 //! It also contains some extra abstractions, such as the `SimpleTrack` struct.
 
 use json::JsonValue;
+use time::{self, Timespec, Tm};
 
 /// A change in the Spotify status.
 pub struct SpotifyStatusChange {
@@ -44,75 +45,75 @@ pub struct SpotifyStatusChange {
 pub struct SpotifyStatus {
     /// The volume.
     /// Valid values are [0.0...1.0].
-    pub volume: f32,
+    volume: f32,
     /// Whether the client is online.
-    pub online: bool,
+    online: bool,
     /// The protocol version.
-    pub version: i32,
+    version: i32,
     /// Whether the client is running.
-    pub running: bool,
+    running: bool,
     /// Whether a track is currently playing.
-    pub playing: bool,
+    playing: bool,
     /// Whether shuffle mode is activated.
-    pub shuffle: bool,
+    shuffle: bool,
     /// The server time as a unix timestamp.
-    pub server_time: i64,
+    server_time: i64,
     /// Whether playing a track is enabled.
-    pub play_enabled: bool,
+    play_enabled: bool,
     /// Whether playing the previous track is enabled.
-    pub prev_enabled: bool,
+    prev_enabled: bool,
     /// Whether playing the next track is enabled.
-    pub next_enabled: bool,
+    next_enabled: bool,
     /// The client version.
-    pub client_version: String,
+    client_version: String,
     /// The current playing position.
-    pub playing_position: f32,
+    playing_position: f32,
     /// The Open Graph state.
-    pub open_graph_state: OpenGraphState,
+    open_graph_state: OpenGraphState,
     /// The currently playing track.
-    pub track: Track,
+    track: Track,
 }
 
 /// A Spotify Open Graph state.
 #[derive(Debug, Clone, PartialEq)]
-pub struct OpenGraphState {
+struct OpenGraphState {
     /// Whether the current session is private.
-    pub private_session: bool,
+    private_session: bool,
     /// Whether posting is disabled.
-    pub posting_disabled: bool,
+    posting_disabled: bool,
 }
 
 /// A Spotify track.
 #[derive(Debug, Clone, PartialEq)]
-pub struct Track {
+struct Track {
     /// The track.
-    pub track: Resource,
+    track: Resource,
     /// The album.
-    pub album: Resource,
+    album: Resource,
     /// The artist.
-    pub artist: Resource,
+    artist: Resource,
     /// The length in full seconds.
-    pub length: i32,
+    length: i32,
     /// The track type.
-    pub track_type: String,
+    track_type: String,
 }
 
 /// A Spotify resource.
 #[derive(Debug, Clone, PartialEq)]
-pub struct Resource {
+struct Resource {
     /// The internal resource uri.
-    pub uri: String,
+    uri: String,
     /// The name.
-    pub name: String,
+    name: String,
     /// The location.
-    pub location: ResourceLocation,
+    location: ResourceLocation,
 }
 
 /// A Spotify resource location.
 #[derive(Debug, Clone, PartialEq)]
-pub struct ResourceLocation {
+struct ResourceLocation {
     /// The online resource url.
-    pub og: String,
+    og: String,
 }
 
 /// A simple track.
@@ -145,9 +146,68 @@ impl SpotifyStatus {
     pub fn track(&self) -> SimpleTrack {
         SimpleTrack::from(&self.track)
     }
-    /// Gets the Spotify client version.
+    /// Gets the client version.
     pub fn version(&self) -> String {
         self.client_version.clone()
+    }
+    /// Gets the volume.
+    /// Possible values range from `0.0_f32` to `1.0_f32`.
+    pub fn volume(&self) -> f32 {
+        self.volume
+    }
+    /// Gets the volume as percentage.
+    /// Possible values range from `0.0_f32` to `100.0_f32`.
+    pub fn volume_percentage(&self) -> f32 {
+        (self.volume * 100_f32).trunc()
+    }
+    /// Gets the server timestamp.
+    pub fn timestamp(&self) -> i64 {
+        self.server_time
+    }
+    /// Gets the local server time.
+    pub fn time(&self) -> Tm {
+        time::at(Timespec::new(self.server_time, 0))
+    }
+    /// Gets the coordinated universal server time.
+    pub fn time_utc(&self) -> Tm {
+        time::at_utc(Timespec::new(self.server_time, 0))
+    }
+    /// Gets a value indicating whether shuffling is enabled.
+    pub fn shuffle_enabled(&self) -> bool {
+        self.shuffle
+    }
+    /// Gets a value indicating whether the client is
+    /// currently connected to the Internet.
+    pub fn is_online(&self) -> bool {
+        self.online
+    }
+    /// Gets a value indicating whether the current
+    /// session is a private session.
+    pub fn is_private_session(&self) -> bool {
+        self.open_graph_state.private_session
+    }
+}
+
+/// Implements `SpotifyStatusChange`.
+impl SpotifyStatusChange {
+    /// Constructs a new `SpotifyStatusChange` with all fields set to true.
+    pub fn new_true() -> SpotifyStatusChange {
+        SpotifyStatusChange {
+            volume: true,
+            online: true,
+            version: true,
+            running: true,
+            playing: true,
+            shuffle: true,
+            server_time: true,
+            play_enabled: true,
+            prev_enabled: true,
+            next_enabled: true,
+            client_version: true,
+            playing_position: true,
+            open_graph_state: true,
+            track: true,
+        }
     }
 }
 
@@ -155,18 +215,18 @@ impl SpotifyStatus {
 impl From<JsonValue> for SpotifyStatus {
     fn from(json: JsonValue) -> SpotifyStatus {
         SpotifyStatus {
-            volume: json["volume"].as_f32().unwrap_or(0f32),
+            volume: json["volume"].as_f32().unwrap_or(0_f32),
             online: json["online"] == true,
-            version: json["version"].as_i32().unwrap_or(0i32),
+            version: json["version"].as_i32().unwrap_or(0_i32),
             running: json["running"] == true,
             playing: json["playing"] == true,
             shuffle: json["shuffle"] == true,
-            server_time: json["server_time"].as_i64().unwrap_or(0i64),
+            server_time: json["server_time"].as_i64().unwrap_or(0_i64),
             play_enabled: json["play_enabled"] == true,
             prev_enabled: json["prev_enabled"] == true,
             next_enabled: json["next_enabled"] == true,
             client_version: get_json_str(&json["client_version"]),
-            playing_position: json["playing_position"].as_f32().unwrap_or(0f32),
+            playing_position: json["playing_position"].as_f32().unwrap_or(0_f32),
             open_graph_state: OpenGraphState::from(&json["open_graph_state"]),
             track: Track::from(&json["track"]),
         }
@@ -191,7 +251,7 @@ impl<'a> From<&'a JsonValue> for Track {
             track: Resource::from(&json["track_resource"]),
             album: Resource::from(&json["album_resource"]),
             artist: Resource::from(&json["artist_resource"]),
-            length: json["length"].as_i32().unwrap_or(0i32),
+            length: json["length"].as_i32().unwrap_or(0_i32),
         }
     }
 }
@@ -236,29 +296,6 @@ impl<'a> From<&'a SpotifyStatus> for SimpleTrack {
 impl ::std::fmt::Display for SimpleTrack {
     fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
         write!(f, "{} - {}", self.artist, self.name)
-    }
-}
-
-/// Implements `SpotifyStatusChange`.
-impl SpotifyStatusChange {
-    /// Constructs a new `SpotifyStatusChange` with all fields set to true.
-    pub fn new_true() -> SpotifyStatusChange {
-        SpotifyStatusChange {
-            volume: true,
-            online: true,
-            version: true,
-            running: true,
-            playing: true,
-            shuffle: true,
-            server_time: true,
-            play_enabled: true,
-            prev_enabled: true,
-            next_enabled: true,
-            client_version: true,
-            playing_position: true,
-            open_graph_state: true,
-            track: true,
-        }
     }
 }
 
