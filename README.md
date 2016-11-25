@@ -147,4 +147,4 @@ That's it! Everything should work now.
 
 [travis-url]: https://travis-ci.org/SplittyDev/spotify-rs
 [crates-url]: https://crates.io/crates/spotify
-[docs-url]: https://splittydev.github.io/spotify-rs/spotify
+[docs-url]: https://docs.rs/spotify
