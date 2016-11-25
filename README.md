@@ -34,7 +34,7 @@ fn main() {
     let spotify = Spotify::connect().unwrap();
 
     // Fetch the current status from Spotify
-    let status = spotify.status();
+    let status = spotify.status().unwrap();
 
     // Display the Spotify Client version
     println!("Spotify Client (Version {})", status.version());
@@ -85,7 +85,7 @@ fn main() {
     // The 'status' variable holds the `SpotifyStatus`,
     // the 'change' variable contains booleans to indicate which fields
     // had changed since the last update.
-    let reactor = spotify.poll(|status, change| {
+    let reactor = spotify.poll(|_, status, change| {
         // Print the Spotify Client version on change.
         if change.client_version {
             println!("Spotify Client (Version {})", status.version());
