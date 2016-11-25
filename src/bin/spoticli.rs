@@ -21,7 +21,7 @@ fn main() {
             }
         }
     };
-    let reactor = spotify.poll(|status, change| {
+    let reactor = spotify.poll(|_, status, change| {
         if change.client_version {
             println!("Spotify Client (Version {})", status.version());
         }

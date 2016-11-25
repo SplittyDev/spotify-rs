@@ -89,7 +89,7 @@ impl Spotify {
     /// closure, together with information of which fields had changed
     /// since the last update. Returns the `JoinHandle` of the new thread.
     pub fn poll<'a, F: 'static>(self, f: F) -> JoinHandle<()>
-        where F: Fn(SpotifyStatus, SpotifyStatusChange) -> bool,
+        where F: Fn(&Spotify, SpotifyStatus, SpotifyStatusChange) -> bool,
               F: std::marker::Send
     {
         thread::spawn(move || {
@@ -99,13 +99,14 @@ impl Spotify {
             loop {
                 curr = get_status(&self.connector).ok();
                 if curr.is_some() && last.is_none() {
-                    if !f(curr.clone().unwrap(), SpotifyStatusChange::new_true()) {
+                    let curr = curr.clone().unwrap();
+                    if !f(&self, curr.clone(), SpotifyStatusChange::new_true()) {
                         break;
                     }
                 } else if curr.is_some() && last.is_some() {
                     let curr = curr.clone().unwrap();
                     let last = last.unwrap();
-                    if !f(curr.clone(), SpotifyStatusChange::from((curr, last))) {
+                    if !f(&self, curr.clone(), SpotifyStatusChange::from((curr, last))) {
                         break;
                     }
                 }
