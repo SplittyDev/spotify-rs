@@ -64,9 +64,6 @@ impl Spotify {
         // That would also be a much better cross-platform solution,
         // because it would work on Linux and macOS and make
         // the dependency on winapi and kernel32-sys unnecessary.
-        if !Spotify::spotify_alive() {
-            return Err(SpotifyError::ClientNotRunning);
-        }
         if !Spotify::spotify_webhelper_alive() {
             return Err(SpotifyError::WebHelperNotRunning);
         }
@@ -96,21 +93,28 @@ impl Spotify {
             let sleep_time = Duration::from_millis(250);
             let mut last: Option<SpotifyStatus> = None;
             let mut curr: Option<SpotifyStatus>;
+            let mut first = true;
             loop {
                 curr = get_status(&self.connector).ok();
-                if curr.is_some() && last.is_none() {
-                    let curr = curr.clone().unwrap();
-                    if !f(&self, curr.clone(), SpotifyStatusChange::new_true()) {
-                        break;
-                    }
-                } else if curr.is_some() && last.is_some() {
-                    let curr = curr.clone().unwrap();
-                    let last = last.unwrap();
-                    if !f(&self, curr.clone(), SpotifyStatusChange::from((curr, last))) {
-                        break;
+                {
+                    let last = last.clone();
+                    if first && curr.is_some() {
+                        let curr = curr.clone().unwrap();
+                        if !f(&self, curr.clone(), SpotifyStatusChange::new_true()) {
+                            break;
+                        }
+                        first = false;
+                    } else if !first && curr.is_some() && last.is_some() {
+                        let curr = curr.clone().unwrap();
+                        let last = last.unwrap();
+                        if !f(&self, curr.clone(), SpotifyStatusChange::from((curr, last))) {
+                            break;
+                        }
                     }
                 }
-                last = curr.clone();
+                if curr.is_some() {
+                    last = curr.clone();
+                }
                 thread::sleep(sleep_time);
             }
         })
@@ -122,12 +126,6 @@ impl Spotify {
     /// Optionally plays a track or adds it to the queue.
     pub fn play(&self, track: String, queue: bool) -> bool {
         self.connector.request_play(track, queue)
-    }
-    /// Tests whether the Spotify process is running.
-    #[cfg(windows)]
-    fn spotify_alive() -> bool {
-        let process = "Spotify.exe";
-        WindowsProcess::find_by_name(process).is_some()
     }
     /// Tests whether the SpotifyWebHelper process is running.
     #[cfg(windows)]
