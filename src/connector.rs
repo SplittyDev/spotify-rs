@@ -11,15 +11,16 @@ const HEADER_ORIGIN_SCHEME: &'static str = "https";
 const HEADER_ORIGIN_HOST: &'static str = "embed.spotify.com";
 
 // Spotify base URLs
-const SPOTIFY_URL_EMBED: &'static str = "https://embed.spotify.com";
-const SPOTIFY_URL_TOKEN: &'static str = "https://open.spotify.com/token";
-const SPOTIFY_URL_LOCAL: &'static str = "https://spotifyrs.spotilocal.com:4370";
+const URL_EMBED: &'static str = "https://embed.spotify.com";
+const URL_TOKEN: &'static str = "https://open.spotify.com/token";
+const URL_LOCAL: &'static str = "https://spotifyrs.spotilocal.com:4370";
 
 // Spotify request end-points
 const REQUEST_CSRF: &'static str = "simplecsrf/token.json";
 const REQUEST_STATUS: &'static str = "remote/status.json";
 const REQUEST_PLAY: &'static str = "remote/play.json";
 const REQUEST_OPEN: &'static str = "remote/open.json";
+const REQUEST_PAUSE: &'static str = "remote/pause.json";
 
 // The referal track
 const REFERAL_TRACK: &'static str = "track/4uLU6hMCjMI75M1A2tKUQC";
@@ -81,14 +82,14 @@ impl SpotifyConnector {
     }
     /// Attempts to start the Spotify client.
     fn start_spotify(&self) -> Result<bool> {
-        match self.query(SPOTIFY_URL_LOCAL, REQUEST_OPEN, false, false, None) {
+        match self.query(URL_LOCAL, REQUEST_OPEN, false, false, None) {
             Ok(result) => Ok(result["running"] == true),
             Err(error) => Err(error),
         }
     }
     /// Fetches the OAuth token from Spotify.
     fn fetch_oauth_token(&self) -> Result<String> {
-        let json = match self.query(SPOTIFY_URL_TOKEN, "", false, false, None) {
+        let json = match self.query(URL_TOKEN, "", false, false, None) {
             Ok(result) => result,
             Err(error) => return Err(error),
         };
@@ -99,7 +100,7 @@ impl SpotifyConnector {
     }
     /// Fetches the CSRF token from Spotify.
     fn fetch_csrf_token(&self) -> Result<String> {
-        let json = match self.query(SPOTIFY_URL_LOCAL, REQUEST_CSRF, false, false, None) {
+        let json = match self.query(URL_LOCAL, REQUEST_CSRF, false, false, None) {
             Ok(result) => result,
             Err(error) => return Err(error),
         };
@@ -110,7 +111,7 @@ impl SpotifyConnector {
     }
     /// Fetches the current status from Spotify.
     pub fn fetch_status_json(&self) -> Result<JsonValue> {
-        self.query(SPOTIFY_URL_LOCAL, REQUEST_STATUS, true, true, None)
+        self.query(URL_LOCAL, REQUEST_STATUS, true, true, None)
     }
     /// Requests a track to be played.
     pub fn request_play(&self, track: String, queue: bool) -> bool {
@@ -120,9 +121,17 @@ impl SpotifyConnector {
                 params.push("action=queue".into());
             }
             params.push(format!("uri={0}&context={0}", track));
-            Some(params)
+            params
         };
-        match self.query(SPOTIFY_URL_LOCAL, REQUEST_PLAY, true, true, params) {
+        match self.query(URL_LOCAL, REQUEST_PLAY, true, true, Some(params)) {
+            Ok(_) => true,
+            _ => false,
+        }
+    }
+    /// Requests the currently playing track to be paused or resumed.
+    pub fn request_pause(&self, pause: bool) -> bool {
+        let params = vec![format!("pause={}", pause)];
+        match self.query(URL_LOCAL, REQUEST_PAUSE, true, true, Some(params)) {
             Ok(_) => true,
             _ => false,
         }
@@ -166,7 +175,7 @@ impl SpotifyConnector {
                 .get::<&str>(url.as_ref())
                 .header(UserAgent(HEADER_UA.into()))
                 .header(Origin::new(HEADER_ORIGIN_SCHEME, HEADER_ORIGIN_HOST, None))
-                .header(Referer(format!("{}/{}", SPOTIFY_URL_EMBED, REFERAL_TRACK)))
+                .header(Referer(format!("{}/{}", URL_EMBED, REFERAL_TRACK)))
                 .send() {
                 Ok(result) => result,
                 Err(error) => return Err(InternalSpotifyError::ReqwestError(error)),

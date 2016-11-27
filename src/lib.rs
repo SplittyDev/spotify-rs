@@ -119,13 +119,23 @@ impl Spotify {
             }
         })
     }
-    /// Fetches the current status from the Spotify client.
+    /// Fetches the current status from the client.
     pub fn status(&self) -> Result<SpotifyStatus> {
         get_status(&self.connector)
     }
     /// Optionally plays a track or adds it to the queue.
     pub fn play(&self, track: String, queue: bool) -> bool {
         self.connector.request_play(track, queue)
+    }
+    /// Pauses the currently playing track.
+    /// Has no effect if the track is already paused.
+    pub fn pause(&self) -> bool {
+        self.connector.request_pause(true)
+    }
+    /// Resumes the currently paused track.
+    /// Has no effect if the track is already playing.
+    pub fn resume(&self) -> bool {
+        self.connector.request_pause(false)
     }
     /// Tests whether the SpotifyWebHelper process is running.
     #[cfg(windows)]
