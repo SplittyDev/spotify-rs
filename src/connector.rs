@@ -13,7 +13,11 @@ const HEADER_ORIGIN_HOST: &'static str = "embed.spotify.com";
 // Spotify base URLs
 const URL_EMBED: &'static str = "https://embed.spotify.com";
 const URL_TOKEN: &'static str = "https://open.spotify.com/token";
-const URL_LOCAL: &'static str = "https://spotifyrs.spotilocal.com:4370";
+const URL_LOCAL: &'static str = "https://spotifyrs.spotilocal.com";
+
+// Spotify local ports
+const PORT_NRM: i32 = 4370;
+const PORT_ALT: i32 = 4371;
 
 // Spotify request end-points
 const REQUEST_CSRF: &'static str = "simplecsrf/token.json";
@@ -51,6 +55,8 @@ pub struct SpotifyConnector {
     oauth_token: String,
     /// The Spotify CSRF token.
     csrf_token: String,
+    /// The port used to connect to Spotify.
+    port: i32,
 }
 
 /// Implements `SpotifyConnector`.
@@ -58,31 +64,51 @@ impl SpotifyConnector {
     /// Constructs a new `SpotifyConnector`.
     /// Retrieves the OAuth and CSRF tokens in the process.
     pub fn connect_new() -> Result<SpotifyConnector> {
+        // Create the reqwest client.
         let client = match Client::new() {
             Ok(client) => client,
             Err(error) => return Err(InternalSpotifyError::ReqwestError(error)),
         };
+        // Create the connector.
         let mut connector = SpotifyConnector {
             client: Mutex::new(client),
             oauth_token: String::default(),
             csrf_token: String::default(),
+            port: PORT_NRM, // use default port
         };
-        if let Err(error) = connector.start_spotify() {
-            return Err(error);
+        // Connect to SpotifyWebHelper and start Spotify.
+        if connector.start_spotify().is_err() {
+            // The connection failed, try an alternative port.
+            connector.update_port(PORT_ALT);
+            if let Err(error) = connector.start_spotify () {
+                // The connection failed again, error out.
+                return Err(error);
+            }
         }
+        // Fetch the OAuth token.
         connector.oauth_token = match connector.fetch_oauth_token() {
             Ok(result) => result,
             Err(error) => return Err(error),
         };
+        // Fetch the CSRF token.
         connector.csrf_token = match connector.fetch_csrf_token() {
             Ok(result) => result,
             Err(error) => return Err(error),
         };
+        // Return the connector.
         Ok(connector)
+    }
+    /// Updates the local Spotify port.
+    fn update_port(&mut self, port: i32) {
+        self.port = port;
+    }
+    /// Constructs the local Spotify url.
+    fn get_local_url(&self) -> String {
+        format!("{}:{}", URL_LOCAL, self.port)
     }
     /// Attempts to start the Spotify client.
     fn start_spotify(&self) -> Result<bool> {
-        match self.query(URL_LOCAL, REQUEST_OPEN, false, false, None) {
+        match self.query(&self.get_local_url(), REQUEST_OPEN, false, false, None) {
             Ok(result) => Ok(result["running"] == true),
             Err(error) => Err(error),
         }
@@ -100,7 +126,7 @@ impl SpotifyConnector {
     }
     /// Fetches the CSRF token from Spotify.
     fn fetch_csrf_token(&self) -> Result<String> {
-        let json = match self.query(URL_LOCAL, REQUEST_CSRF, false, false, None) {
+        let json = match self.query(&self.get_local_url(), REQUEST_CSRF, false, false, None) {
             Ok(result) => result,
             Err(error) => return Err(error),
         };
@@ -111,7 +137,7 @@ impl SpotifyConnector {
     }
     /// Fetches the current status from Spotify.
     pub fn fetch_status_json(&self) -> Result<JsonValue> {
-        self.query(URL_LOCAL, REQUEST_STATUS, true, true, None)
+        self.query(&self.get_local_url(), REQUEST_STATUS, true, true, None)
     }
     /// Requests a track to be played.
     pub fn request_play(&self, track: String, queue: bool) -> bool {
@@ -123,18 +149,12 @@ impl SpotifyConnector {
             params.push(format!("uri={0}&context={0}", track));
             params
         };
-        match self.query(URL_LOCAL, REQUEST_PLAY, true, true, Some(params)) {
-            Ok(_) => true,
-            _ => false,
-        }
+        self.query(&self.get_local_url(), REQUEST_PLAY, true, true, Some(params)).is_ok()
     }
     /// Requests the currently playing track to be paused or resumed.
     pub fn request_pause(&self, pause: bool) -> bool {
         let params = vec![format!("pause={}", pause)];
-        match self.query(URL_LOCAL, REQUEST_PAUSE, true, true, Some(params)) {
-            Ok(_) => true,
-            _ => false,
-        }
+        self.query(&self.get_local_url(), REQUEST_PAUSE, true, true, Some(params)).is_ok()
     }
     /// Queries the specified base url with the specified query.
     /// Optionally includes the OAuth and/or CSRF token in the query.

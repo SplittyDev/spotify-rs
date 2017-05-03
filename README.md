@@ -25,6 +25,7 @@ Since version 0.5.0, spotify-rs can queue and play songs on the local Spotify cl
 ## Examples
 The following is a minimal example to show you what's possible with spotify-rs.   
 Please note that this example code lacks error checking, it's really only a quick demonstration.
+
 ```rust,no_run
 extern crate spotify;
 use spotify::Spotify;
@@ -45,6 +46,7 @@ fn main() {
 ```
 
 Example output:
+
 ```
 Spotify Client (Version 1.0.42.151.g19de0aa6)
 Playing: Rick Astley - Never Gonna Give You Up
@@ -52,6 +54,7 @@ Playing: Rick Astley - Never Gonna Give You Up
 
 Of course I also have a complete example for you,   
 with proper error checking and long polling! :P
+
 ```rust,no_run
 extern crate spotify;
 use spotify::{Spotify, SpotifyError};
@@ -114,6 +117,7 @@ fn main() {
 ```
 
 Example output:
+
 ```
 Spotify Client (Version 1.0.42.151.g19de0aa6)
 Now playing: Tim Minchin - White Wine In The Sun
