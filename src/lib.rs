@@ -123,9 +123,30 @@ impl Spotify {
     pub fn status(&self) -> Result<SpotifyStatus> {
         get_status(&self.connector)
     }
-    /// Optionally plays a track or adds it to the queue.
-    pub fn play(&self, track: String, queue: bool) -> bool {
-        self.connector.request_play(track, queue)
+    /// Plays a track.
+    pub fn play(&self, track: String) -> bool {
+        // Try to fix broken track URIs
+        // In: https://open.spotify.com/track/1pGZIV8olkbRMjyHWoEXyt
+        // In: open.spotify.com/track/1pGZIV8olkbRMjyHWoEXyt
+        // In: track/1pGZIV8olkbRMjyHWoEXyt
+        // In: track:1pGZIV8olkbRMjyHWoEXyt
+        // Out: spotify:track:1pGZIV8olkbRMjyHWoEXyt
+        let track: String = {
+            let track = track
+                .replace("https://", "http://") // https -> http
+                .trim_left_matches("http://") // get rid of protocol
+                .trim_left_matches("open.spotify.com") // get rid of domain name
+                .replace("/", ":") // turn all / into :
+                .trim_left_matches(":") // get rid of : at the beginning
+                .to_owned();
+            if track.starts_with("spotify:") {
+                track
+            } else {
+                format!("spotify:{}", track) // prepend proper protocol
+            }
+        };
+        // Play the track
+        self.connector.request_play(track)
     }
     /// Pauses the currently playing track.
     /// Has no effect if the track is already paused.

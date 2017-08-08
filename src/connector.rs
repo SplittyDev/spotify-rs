@@ -140,15 +140,8 @@ impl SpotifyConnector {
         self.query(&self.get_local_url(), REQUEST_STATUS, true, true, None)
     }
     /// Requests a track to be played.
-    pub fn request_play(&self, track: String, queue: bool) -> bool {
-        let params = {
-            let mut params = Vec::<String>::new();
-            if queue {
-                params.push("action=queue".into());
-            }
-            params.push(format!("uri={0}&context={0}", track));
-            params
-        };
+    pub fn request_play(&self, track: String) -> bool {
+        let params = vec![format!("uri={0}", track)];
         self.query(&self.get_local_url(), REQUEST_PLAY, true, true, Some(params)).is_ok()
     }
     /// Requests the currently playing track to be paused or resumed.

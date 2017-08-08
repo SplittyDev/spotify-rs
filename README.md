@@ -7,6 +7,8 @@
 
 Easy to use Spotify Local API abstraction library.
 
+NEW in version 0.7.0: Automatically fixes broken or incomplete track URIs.
+
 ## What can I do with it
 Spotify-rs provides an easy-to-use abstraction over the Spotify Local API.   
 It is made for communicating with the local Spotify client in a straightforward way.
@@ -15,12 +17,10 @@ You can easily retrieve the currently playing track, the artist who made it,
 the album it's from, the version of the Spotify Client, whether the Spotify Client   
 is online or offline, etc.
 
-Since version 0.4.0, spotify-rs supports asynchronous polling, so now   
+Spotify-rs supports asynchronous polling, so now   
 you can just register a callback, sit back and watch your application deliver   
 live information about the track you're currently playing, the current volume,   
 or, really, anything else supported by the Spotify Local API.
-
-Since version 0.5.0, spotify-rs can queue and play songs on the local Spotify client!
 
 ## Examples
 The following is a minimal example to show you what's possible with spotify-rs.   

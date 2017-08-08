@@ -85,35 +85,35 @@ struct OpenGraphState {
 
 /// A Spotify track.
 #[derive(Debug, Clone, PartialEq)]
-struct Track {
+pub struct Track {
     /// The track.
-    track: Resource,
+    pub track: Resource,
     /// The album.
-    album: Resource,
+    pub album: Resource,
     /// The artist.
-    artist: Resource,
+    pub artist: Resource,
     /// The length in full seconds.
-    length: i32,
+    pub length: i32,
     /// The track type.
-    track_type: String,
+    pub track_type: String,
 }
 
 /// A Spotify resource.
 #[derive(Debug, Clone, PartialEq)]
-struct Resource {
+pub struct Resource {
     /// The internal resource uri.
-    uri: String,
+    pub uri: String,
     /// The name.
-    name: String,
+    pub name: String,
     /// The location.
-    location: ResourceLocation,
+    pub location: ResourceLocation,
 }
 
 /// A Spotify resource location.
 #[derive(Debug, Clone, PartialEq)]
-struct ResourceLocation {
+pub struct ResourceLocation {
     /// The online resource url.
-    og: String,
+    pub og: String,
 }
 
 /// A simple track.
@@ -145,6 +145,11 @@ impl SpotifyStatus {
     /// the names of the track, album and artist.
     pub fn track(&self) -> SimpleTrack {
         SimpleTrack::from(&self.track)
+    }
+    /// Gets all information regarding the
+    /// currently playing track.
+    pub fn full_track(&self) -> Track {
+        self.track.clone()
     }
     /// Gets the client version.
     pub fn version(&self) -> String {
