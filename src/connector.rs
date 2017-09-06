@@ -1,5 +1,6 @@
 use std::io::Read;
 use std::sync::Mutex;
+use std::net::TcpListener;
 use reqwest::{self, Client};
 use reqwest::header::{Origin, Referer, UserAgent};
 use json::{self, JsonValue};
@@ -13,11 +14,11 @@ const HEADER_ORIGIN_HOST: &'static str = "embed.spotify.com";
 // Spotify base URLs
 const URL_EMBED: &'static str = "https://embed.spotify.com";
 const URL_TOKEN: &'static str = "https://open.spotify.com/token";
-const URL_LOCAL: &'static str = "https://spotifyrs.spotilocal.com";
+const URL_LOCAL: &'static str = "http://spotifyrs.spotilocal.com";
 
 // Spotify local ports
-const PORT_NRM: i32 = 4370;
-const PORT_ALT: i32 = 4371;
+const PORT_START: u16 = 4370;
+const PORT_END: u16 = 4399;
 
 // Spotify request end-points
 const REQUEST_CSRF: &'static str = "simplecsrf/token.json";
@@ -74,16 +75,13 @@ impl SpotifyConnector {
             client: Mutex::new(client),
             oauth_token: String::default(),
             csrf_token: String::default(),
-            port: PORT_NRM, // use default port
+            port: 0, // will be populated later
         };
+        connector.update_port();
         // Connect to SpotifyWebHelper and start Spotify.
-        if connector.start_spotify().is_err() {
-            // The connection failed, try an alternative port.
-            connector.update_port(PORT_ALT);
-            if let Err(error) = connector.start_spotify () {
-                // The connection failed again, error out.
-                return Err(error);
-            }
+        if let Err(error) = connector.start_spotify () {
+            // The connection failed, error out.
+             return Err(error);
         }
         // Fetch the OAuth token.
         connector.oauth_token = match connector.fetch_oauth_token() {
@@ -99,8 +97,13 @@ impl SpotifyConnector {
         Ok(connector)
     }
     /// Updates the local Spotify port.
-    fn update_port(&mut self, port: i32) {
-        self.port = port;
+    fn update_port(&mut self) {
+    	for port in PORT_START..PORT_END {
+    		if TcpListener::bind(("127.0.0.1", port)).is_err() {
+    			self.port = port as i32;
+    			return;
+    		}
+    	}
     }
     /// Constructs the local Spotify url.
     fn get_local_url(&self) -> String {
