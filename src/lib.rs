@@ -22,8 +22,8 @@ use std::thread::{self, JoinHandle};
 use std::time::Duration;
 #[cfg(windows)]
 use windows_process::WindowsProcess;
-use connector::{SpotifyConnector, InternalSpotifyError};
-use status::{SpotifyStatus, SpotifyStatusChange};
+use crate::connector::{SpotifyConnector, InternalSpotifyError};
+use crate::status::{SpotifyStatus, SpotifyStatusChange};
 
 /// The `Result` type used in this crate.
 type Result<T> = std::result::Result<T, SpotifyError>;
