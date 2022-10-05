@@ -5,25 +5,25 @@
 //! and manipulate the local Spotify client instance.
 
 // Extern crates
-extern crate winapi;
+extern crate json;
 extern crate kernel32;
 extern crate reqwest;
 extern crate time;
-extern crate json;
+extern crate winapi;
 
 // Modules
-#[cfg(windows)]
-mod windows_process;
 mod connector;
 pub mod status;
+#[cfg(windows)]
+mod windows_process;
 
 // Imports
+use crate::connector::{InternalSpotifyError, SpotifyConnector};
+use crate::status::{SpotifyStatus, SpotifyStatusChange};
 use std::thread::{self, JoinHandle};
 use std::time::Duration;
 #[cfg(windows)]
 use windows_process::WindowsProcess;
-use crate::connector::{SpotifyConnector, InternalSpotifyError};
-use crate::status::{SpotifyStatus, SpotifyStatusChange};
 
 /// The `Result` type used in this crate.
 type Result<T> = std::result::Result<T, SpotifyError>;
@@ -85,9 +85,10 @@ impl Spotify {
     /// client status. Sends the updated status to the specified
     /// closure, together with information of which fields had changed
     /// since the last update. Returns the `JoinHandle` of the new thread.
-    pub fn poll<'a, F: 'static>(self, f: F) -> JoinHandle<()>
-        where F: Fn(&Spotify, SpotifyStatus, SpotifyStatusChange) -> bool,
-              F: std::marker::Send
+    pub fn poll<F: 'static>(self, f: F) -> JoinHandle<()>
+    where
+        F: Fn(&Spotify, SpotifyStatus, SpotifyStatusChange) -> bool,
+        F: std::marker::Send,
     {
         thread::spawn(move || {
             let sleep_time = Duration::from_millis(250);
@@ -136,8 +137,8 @@ impl Spotify {
                 .replace("https://", "http://") // https -> http
                 .trim_start_matches("http://") // get rid of protocol
                 .trim_start_matches("open.spotify.com") // get rid of domain name
-                .replace("/", ":") // turn all / into :
-                .trim_start_matches(":") // get rid of : at the beginning
+                .replace('/', ":") // turn all / into :
+                .trim_start_matches(':') // get rid of : at the beginning
                 .to_owned();
             if track.starts_with("spotify:") {
                 track

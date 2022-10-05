@@ -1,34 +1,33 @@
-use std::io::Read;
-use std::sync::Mutex;
-use std::net::TcpListener;
-use reqwest::{self, Client};
-use reqwest::header::{USER_AGENT, ORIGIN, REFERER};
 use json::{self, JsonValue};
-use time;
+use reqwest::header::{ORIGIN, REFERER, USER_AGENT};
+use reqwest::{self, Client};
+use std::io::Read;
+use std::net::TcpListener;
+use std::sync::Mutex;
 
 // Headers
-const HEADER_UA: &'static str = "Mozilla/5.0 (Windows; rv:50.0) Gecko/20100101 Firefox/50.0";
-const HEADER_ORIGIN_SCHEME: &'static str = "https";
-const HEADER_ORIGIN_HOST: &'static str = "embed.spotify.com";
+const HEADER_UA: &str = "Mozilla/5.0 (Windows; rv:50.0) Gecko/20100101 Firefox/50.0";
+const HEADER_ORIGIN_SCHEME: &str = "https";
+const HEADER_ORIGIN_HOST: &str = "embed.spotify.com";
 
 // Spotify base URLs
-const URL_EMBED: &'static str = "https://embed.spotify.com";
-const URL_TOKEN: &'static str = "https://open.spotify.com/token";
-const URL_LOCAL: &'static str = "http://spotifyrs.spotilocal.com";
+const URL_EMBED: &str = "https://embed.spotify.com";
+const URL_TOKEN: &str = "https://open.spotify.com/token";
+const URL_LOCAL: &str = "http://spotifyrs.spotilocal.com";
 
 // Spotify local ports
 const PORT_START: u16 = 4370;
 const PORT_END: u16 = 4399;
 
 // Spotify request end-points
-const REQUEST_CSRF: &'static str = "simplecsrf/token.json";
-const REQUEST_STATUS: &'static str = "remote/status.json";
-const REQUEST_PLAY: &'static str = "remote/play.json";
-const REQUEST_OPEN: &'static str = "remote/open.json";
-const REQUEST_PAUSE: &'static str = "remote/pause.json";
+const REQUEST_CSRF: &str = "simplecsrf/token.json";
+const REQUEST_STATUS: &str = "remote/status.json";
+const REQUEST_PLAY: &str = "remote/play.json";
+const REQUEST_OPEN: &str = "remote/open.json";
+const REQUEST_PAUSE: &str = "remote/pause.json";
 
 // The referal track
-const REFERAL_TRACK: &'static str = "track/4uLU6hMCjMI75M1A2tKUQC";
+const REFERAL_TRACK: &str = "track/4uLU6hMCjMI75M1A2tKUQC";
 
 /// The `Result` type used in this module.
 type Result<T> = ::std::result::Result<T, InternalSpotifyError>;
@@ -76,10 +75,7 @@ impl SpotifyConnector {
         };
         connector.update_port();
         // Connect to SpotifyWebHelper and start Spotify.
-        if let Err(error) = connector.start_spotify () {
-            // The connection failed, error out.
-             return Err(error);
-        }
+        connector.start_spotify()?;
         // Fetch the OAuth token.
         connector.oauth_token = match connector.fetch_oauth_token() {
             Ok(result) => result,
@@ -95,12 +91,12 @@ impl SpotifyConnector {
     }
     /// Updates the local Spotify port.
     fn update_port(&mut self) {
-    	for port in PORT_START..PORT_END {
-    		if TcpListener::bind(("127.0.0.1", port)).is_err() {
-    			self.port = port as i32;
-    			return;
-    		}
-    	}
+        for port in PORT_START..PORT_END {
+            if TcpListener::bind(("127.0.0.1", port)).is_err() {
+                self.port = port as i32;
+                return;
+            }
+        }
     }
     /// Constructs the local Spotify url.
     fn get_local_url(&self) -> String {
@@ -142,27 +138,42 @@ impl SpotifyConnector {
     /// Requests a track to be played.
     pub fn request_play(&self, track: String) -> bool {
         let params = vec![format!("uri={0}", track)];
-        self.query(&self.get_local_url(), REQUEST_PLAY, true, true, Some(params)).is_ok()
+        self.query(
+            &self.get_local_url(),
+            REQUEST_PLAY,
+            true,
+            true,
+            Some(params),
+        )
+        .is_ok()
     }
     /// Requests the currently playing track to be paused or resumed.
     pub fn request_pause(&self, pause: bool) -> bool {
         let params = vec![format!("pause={}", pause)];
-        self.query(&self.get_local_url(), REQUEST_PAUSE, true, true, Some(params)).is_ok()
+        self.query(
+            &self.get_local_url(),
+            REQUEST_PAUSE,
+            true,
+            true,
+            Some(params),
+        )
+        .is_ok()
     }
     /// Queries the specified base url with the specified query.
     /// Optionally includes the OAuth and/or CSRF token in the query.
-    fn query(&self,
-             base: &str,
-             query: &str,
-             with_oauth: bool,
-             with_csrf: bool,
-             params: Option<Vec<String>>)
-             -> Result<JsonValue> {
+    fn query(
+        &self,
+        base: &str,
+        query: &str,
+        with_oauth: bool,
+        with_csrf: bool,
+        params: Option<Vec<String>>,
+    ) -> Result<JsonValue> {
         let timestamp = time::now_utc().to_timespec().sec;
         let arguments = {
             let mut arguments = String::new();
-            if !query.contains("?") {
-                arguments.push_str("?");
+            if !query.contains('?') {
+                arguments.push('?');
             }
             arguments.push_str("&ref=&cors=");
             arguments.push_str(format!("&_={}", timestamp).as_ref());
@@ -182,14 +193,19 @@ impl SpotifyConnector {
         let url = format!("{}/{}{}", base, query, arguments);
         let response = {
             let mut content = String::new();
-            let mut resp = match self.client
+            let mut resp = match self
+                .client
                 .lock()
                 .unwrap()
                 .get::<&str>(url.as_ref())
                 .header(USER_AGENT, HEADER_UA)
-                .header(ORIGIN, format!("{}://{}", HEADER_ORIGIN_SCHEME, HEADER_ORIGIN_HOST))
+                .header(
+                    ORIGIN,
+                    format!("{}://{}", HEADER_ORIGIN_SCHEME, HEADER_ORIGIN_HOST),
+                )
                 .header(REFERER, format!("{}/{}", URL_EMBED, REFERAL_TRACK))
-                .send() {
+                .send()
+            {
                 Ok(result) => result,
                 Err(error) => return Err(InternalSpotifyError::ReqwestError(error)),
             };

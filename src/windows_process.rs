@@ -1,12 +1,12 @@
 #![cfg(windows)]
 
+use kernel32::{CreateToolhelp32Snapshot, OpenProcess, Process32First, Process32Next};
 use std::cmp::Ordering;
 use std::ffi::{CStr, CString};
-use std::mem::{zeroed, size_of};
+use std::mem::{size_of, zeroed};
 use winapi::minwindef::{DWORD, FALSE, TRUE};
-use winapi::winnt::{HANDLE, PROCESS_ALL_ACCESS};
 use winapi::tlhelp32::{PROCESSENTRY32, TH32CS_SNAPPROCESS};
-use kernel32::{CreateToolhelp32Snapshot, Process32First, Process32Next, OpenProcess};
+use winapi::winnt::{HANDLE, PROCESS_ALL_ACCESS};
 
 /// The `WindowsProcess` struct.
 #[derive(Clone)]

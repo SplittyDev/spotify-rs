@@ -75,7 +75,7 @@ pub struct SpotifyStatus {
 }
 
 /// A Spotify Open Graph state.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 struct OpenGraphState {
     /// Whether the current session is private.
     private_session: bool,
@@ -84,7 +84,7 @@ struct OpenGraphState {
 }
 
 /// A Spotify track.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Track {
     /// The track.
     pub track: Resource,
@@ -99,7 +99,7 @@ pub struct Track {
 }
 
 /// A Spotify resource.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Resource {
     /// The internal resource uri.
     pub uri: String,
@@ -110,7 +110,7 @@ pub struct Resource {
 }
 
 /// A Spotify resource location.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ResourceLocation {
     /// The online resource url.
     pub og: String,
@@ -119,7 +119,7 @@ pub struct ResourceLocation {
 /// A simple track.
 /// Provides an abstraction over the more
 /// complicated and quite messy `Track` struct.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SimpleTrack {
     /// The track name.
     pub name: String,
@@ -275,7 +275,9 @@ impl<'a> From<&'a JsonValue> for Resource {
 /// Implements `From<&'a JsonValue>` for `ResourceLocation`.
 impl<'a> From<&'a JsonValue> for ResourceLocation {
     fn from(json: &'a JsonValue) -> ResourceLocation {
-        ResourceLocation { og: get_json_str(&json["og"]) }
+        ResourceLocation {
+            og: get_json_str(&json["og"]),
+        }
     }
 }
 
@@ -310,7 +312,9 @@ impl From<(SpotifyStatus, SpotifyStatus)> for SpotifyStatusChange {
         let curr = set.0;
         let last = set.1;
         macro_rules! status_compare_field {
-            ($field:ident) => (curr.$field != last.$field)
+            ($field:ident) => {
+                curr.$field != last.$field
+            };
         }
         SpotifyStatusChange {
             volume: status_compare_field!(volume),
