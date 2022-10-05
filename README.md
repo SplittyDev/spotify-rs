@@ -5,26 +5,29 @@
 
 [Documentation][docs-url]
 
-Easy to use Spotify Local API abstraction library.
-
-NEW in version 0.7.0: Automatically fixes broken or incomplete track URIs.
+Spotify-rs provides an easy-to-use abstraction over the Spotify Local API.
 
 ## What can I do with it
-Spotify-rs provides an easy-to-use abstraction over the Spotify Local API.   
-It is made for communicating with the local Spotify client in a straightforward way.
 
-You can easily retrieve the currently playing track, the artist who made it,   
-the album it's from, the version of the Spotify Client, whether the Spotify Client   
-is online or offline, etc.
+Features:
+- Play a track using track ID or URI
+- Pause/resume the currently played track
+- Get currently played track (including album, artist, etc.)
+- Get current volume
+- Get Spotify client version and online status
+- React to changes by long polling in a separate thread
 
-Spotify-rs supports asynchronous polling, so now   
-you can just register a callback, sit back and watch your application deliver   
-live information about the track you're currently playing, the current volume,   
-or, really, anything else supported by the Spotify Local API.
+And a few goodies:
+- Automatically fixes broken (but recoverable) track IDs and URIs
+- Check whether SpotifyWebHelper is running (Windows only)
+
+## Is the project still alive?
+
+I haven't really worked on this library for a long time, but that's mostly because it's pretty much done. There aren't any significant bugs that I know of and the cli should work just fine. I've made an effort to port everything over from 2015 to 2021 edition and the code compiles (tested using Rust 1.64).
 
 ## Examples
 The following is a minimal example to show you what's possible with spotify-rs.   
-Please note that this example code lacks error checking, it's really only a quick demonstration.
+Please note that this example lacks proper error handling for the sake of brevity.
 
 ```rust,no_run
 extern crate spotify;
@@ -52,8 +55,7 @@ Spotify Client (Version 1.0.42.151.g19de0aa6)
 Playing: Rick Astley - Never Gonna Give You Up
 ```
 
-Of course I also have a complete example for you,   
-with proper error checking and long polling! :P
+Here's a complete example with long polling and better error handling:
 
 ```rust,no_run
 extern crate spotify;
@@ -130,12 +132,10 @@ Volume: 100%
 ```
 
 ## F.A.Q.
-**It doesn't connect, what's wrong?**   
-You probably forgot to start Spotify.   
-Also make sure that the SpotifyWebHelper process is active.
+**It doesn't connect, what's wrong?**    
+Make sure that Spotify is running and the SpotifyWebHelper process is active.
 
-If you can't find SpotifyWebHelper.exe in your process list,   
-you might have it disabled. Here's how you enable it:
+If you can't find SpotifyWebHelper.exe in your process list, you might have disabled it by accident. Here's how you enable it:
 
 - Open Spotify
 - Press `Ctrl` + `P` to open the preferences
@@ -144,7 +144,8 @@ you might have it disabled. Here's how you enable it:
   enable `Allow Spotify to be opened from the web`.
 
 You might wanna restart Spotify after doing that.   
-That's it! Everything should work now.
+
+> **Update**: I'm not sure if this option is still exposed nowadays. Spotify 1.1.95 (2022) on macOS doesn't seem to have this anymore, and I'm not sure if Spotify still exposes the local API at all. If it doesn't, this library is pretty much useless. If you know whether this still works, please open an issue and let me know!
 
 [travis-url]: https://travis-ci.org/SplittyDev/spotify-rs
 [crates-url]: https://crates.io/crates/spotify
