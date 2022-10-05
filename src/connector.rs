@@ -2,7 +2,7 @@ use std::io::Read;
 use std::sync::Mutex;
 use std::net::TcpListener;
 use reqwest::{self, Client};
-use reqwest::header::{Origin, Referer, UserAgent};
+use reqwest::header::{USER_AGENT, ORIGIN, REFERER};
 use json::{self, JsonValue};
 use time;
 
@@ -66,10 +66,7 @@ impl SpotifyConnector {
     /// Retrieves the OAuth and CSRF tokens in the process.
     pub fn connect_new() -> Result<SpotifyConnector> {
         // Create the reqwest client.
-        let client = match Client::new() {
-            Ok(client) => client,
-            Err(error) => return Err(InternalSpotifyError::ReqwestError(error)),
-        };
+        let client = Client::new();
         // Create the connector.
         let mut connector = SpotifyConnector {
             client: Mutex::new(client),
@@ -189,9 +186,9 @@ impl SpotifyConnector {
                 .lock()
                 .unwrap()
                 .get::<&str>(url.as_ref())
-                .header(UserAgent(HEADER_UA.into()))
-                .header(Origin::new(HEADER_ORIGIN_SCHEME, HEADER_ORIGIN_HOST, None))
-                .header(Referer(format!("{}/{}", URL_EMBED, REFERAL_TRACK)))
+                .header(USER_AGENT, HEADER_UA)
+                .header(ORIGIN, format!("{}://{}", HEADER_ORIGIN_SCHEME, HEADER_ORIGIN_HOST))
+                .header(REFERER, format!("{}/{}", URL_EMBED, REFERAL_TRACK))
                 .send() {
                 Ok(result) => result,
                 Err(error) => return Err(InternalSpotifyError::ReqwestError(error)),
