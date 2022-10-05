@@ -134,10 +134,10 @@ impl Spotify {
         let track: String = {
             let track = track
                 .replace("https://", "http://") // https -> http
-                .trim_left_matches("http://") // get rid of protocol
-                .trim_left_matches("open.spotify.com") // get rid of domain name
+                .trim_start_matches("http://") // get rid of protocol
+                .trim_start_matches("open.spotify.com") // get rid of domain name
                 .replace("/", ":") // turn all / into :
-                .trim_left_matches(":") // get rid of : at the beginning
+                .trim_start_matches(":") // get rid of : at the beginning
                 .to_owned();
             if track.starts_with("spotify:") {
                 track

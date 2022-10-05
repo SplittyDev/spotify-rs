@@ -1,6 +1,6 @@
 extern crate spotify;
 use spotify::{Spotify, SpotifyError};
-use std::{thread, time};
+
 
 fn main() {
     let spotify = match Spotify::connect() {
@@ -22,7 +22,7 @@ fn main() {
             }
         }
     };
-    let reactor = spotify.poll(|client, status, change| {
+    let reactor = spotify.poll(|_client, status, change| {
         if change.client_version {
             println!("Spotify Client (Version {})", status.version());
         }
