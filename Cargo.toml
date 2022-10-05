@@ -9,7 +9,7 @@ documentation = "https://docs.rs/spotify"
 keywords = ["Spotify", "API"]
 license = "MIT"
 build = "build.rs"
-edition = "2018"
+edition = "2021"
 
 [lib]
 name = "spotify"
