@@ -6,7 +6,6 @@
 
 // Extern crates
 extern crate json;
-extern crate kernel32;
 extern crate reqwest;
 extern crate time;
 extern crate winapi;
