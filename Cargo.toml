@@ -1,6 +1,6 @@
 [package]
 name = "spotify"
-version = "0.8.0"
+version = "0.8.1"
 authors = ["Splitty <splittydev@gmail.com>"]
 description = "Easy to use Spotify Local API abstractions."
 readme = "README.md"
