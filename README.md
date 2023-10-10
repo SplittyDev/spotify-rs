@@ -1,11 +1,14 @@
 # Spotify-rs
-[![Travis CI](https://img.shields.io/travis/SplittyDev/spotify-rs/master.svg?style=flat-square)][travis-url]
 [![Crates.io](https://img.shields.io/crates/l/spotify.svg?style=flat-square)][crates-url]
 [![Crates.io](https://img.shields.io/crates/v/spotify.svg?style=flat-square)][crates-url]
 
 [Documentation][docs-url]
 
 Spotify-rs provides an easy-to-use abstraction over the Spotify Local API.
+
+## ⚠️ DEPRECATION WARNING
+
+This library is deprecated and no longer maintained. Spotify has removed the Local API and SpotifyWebHelper from their desktop clients, so this library is no longer useful. I'm keeping it around for historical purposes, but there's no point in using it anymore.
 
 ## What can I do with it
 
@@ -147,6 +150,5 @@ You might wanna restart Spotify after doing that.
 
 > **Update**: I'm not sure if this option is still exposed nowadays. Spotify 1.1.95 (2022) on macOS doesn't seem to have this anymore, and I'm not sure if Spotify still exposes the local API at all. If it doesn't, this library is pretty much useless. If you know whether this still works, please open an issue and let me know!
 
-[travis-url]: https://travis-ci.org/SplittyDev/spotify-rs
 [crates-url]: https://crates.io/crates/spotify
 [docs-url]: https://docs.rs/spotify
